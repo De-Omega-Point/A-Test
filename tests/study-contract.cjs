@@ -1,0 +1,48 @@
+/* Run: node tests/study-contract.cjs */
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');let checks=0;
+const check=(condition,label)=>{assert.ok(condition,label);checks++;};
+function fixture(initial={},blocked=false){
+ const stored=new Map(Object.entries(initial));
+ const node=()=>({innerHTML:'',textContent:'',dataset:{},style:{},classList:{add(){},remove(){},toggle(){}},querySelector(){return null;},querySelectorAll(){return[];},addEventListener(){},setAttribute(){},after(){},focus(){}});
+ const app=node(),nodes=new Map();
+ const native={getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,String(v))};
+ const window={scrollTo(){},addEventListener(){},dispatchEvent(){}};
+ Object.defineProperty(window,'localStorage',{get(){if(blocked)throw new Error('Storage denied');return native;}});
+ const document={querySelector:s=>s==='#app'?app:node(),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:()=>node(),addEventListener(){},body:node()};
+ const context=vm.createContext({console,window,document,localStorage:native,Event:class{},setInterval:()=>1,clearInterval(){}});
+ for(const file of ['storage.js','app.js','study-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+ return{context,app,stored,run:s=>vm.runInContext(s,context)};
+}
+let f=fixture();
+f.run('cardIndex=0;flipped=false;cards()');const first=f.app.innerHTML;
+f.run('cardIndex=1;cards()');check(f.app.innerHTML!==first,'Manual card navigation changes the question');
+f.run('cardIndex=0;cards()');check(f.app.innerHTML===first,'Manual Previous returns to the chosen card');
+f.run('flipped=true;cards()');check(f.app.innerHTML!==first,'Reveal changes the face');
+f.run('study()');check(f.app.innerHTML.includes('data-view="readings"')&&f.app.innerHTML.includes('data-view="glossary"'),'Study exposes readings and glossary');
+check(f.app.innerHTML.includes('id="part-values"')&&f.app.innerHTML.includes('id="study-library"'),'Study sections have real scroll targets');
+f.run('orderedDomains().forEach(d=>state.domains[d.id]=3);study()');check(!f.app.innerHTML.includes('data-domain="undefined"'),'Completed parts never generate invalid links');
+check(f.app.innerHTML.includes('Review this part'),'Completed parts remain reviewable');
+f.run('openDomain("first-peoples")');check(f.run('state.domains["first-peoples"]')===3,'Opening a verified domain preserves verification');
+check(f.app.innerHTML.includes('id="domain-evidence"'),'Domain page includes evidence scroll target');
+f.run('openDomain("invalid")');check(f.app.innerHTML.includes('study-parts'),'Invalid domain recovers to Study');
+f=fixture({'atest-state':JSON.stringify({mocks:{},stats:{people:'bad'},reviews:[],domains:{states:99},domainEvidence:{states:{t:2,c:12}}})});
+check(f.run('Array.isArray(state.mocks)'),'Malformed mock history is repaired in memory');
+check(f.run('state.domains.states')===3,'Out-of-range stages are clamped');
+check(f.run('state.domainEvidence.states.c')===2,'Evidence cannot have more correct answers than attempts');
+check(f.stored.get('atest-state').includes('"mocks":{}'),'Reading a record does not overwrite the original');
+f.run('readiness()');check(f.app.innerHTML.includes('VERIFIED COVERAGE'),'Repaired state renders Progress');
+f=fixture({},true);f.run('openDomain("states");save()');check(f.run('state.domains.states')===1,'Denied device storage does not block lessons');
+check(f.run('localStorage.getItem("atest-last-domain")')==='states','Session fallback remembers the last domain');
+f.run('mock();mockEnds=Date.now()-1;mockAnswer(0)');check(f.app.innerHTML.includes('Not answered'),'Expired mock lists unanswered questions');
+check(f.run('state.mocks[0].unanswered')===20,'Expired mock records all unanswered items');
+f.run('finishMock()');check(f.run('state.mocks.length')===1,'Mock submission is idempotent');
+const ui=fs.readFileSync(path.join(root,'study-ui.js'),'utf8');
+check(ui.includes("Math.max(2,state.domains[id]||0)"),'Understand action cannot downgrade mastery');
+check(ui.includes("nav.setAttribute('aria-label','On this page')"),'Section menu is explicitly labelled');
+check(ui.includes('sectionScroll(section,true)'),'Section links scroll instead of switching page');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+check(html.indexOf('src="storage.js')<html.indexOf('src="app.js'),'Safe storage loads before the legacy application');
+check(html.indexOf('src="study-ui.js')<html.indexOf('src="arcade.js'),'Repairs load before the arcade starts');
+console.log(`${checks} study repair checks passed.`);
