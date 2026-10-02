@@ -30,7 +30,7 @@ jobs:
           grep -q 'data-view="readiness"' index.html
           grep -q 'function dashboard' app.js
           grep -q 'function mock' app.js
-          grep -q 'function curriculumAudit' app.js
+          grep -q 'function curriculumAudit' app.js\n          grep -q 'function studyResume' app.js\n          grep -q 'function adaptiveEvidence' app.js\n          grep -q 'function finishMock' app.js\n          grep -q 'function games' app.js
           grep -q 'const domainKnowledge=' app.js
           grep -q 'const domainEnrichment=' app.js
           grep -q 'const domainQuestionBank=' app.js
