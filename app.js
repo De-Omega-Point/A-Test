@@ -3,6 +3,8 @@ const modules=[
 {id:"visual",icon:"▥",title:"Infographics",desc:"Explore interactive visual guides",cls:"cyan"},
 {id:"map",icon:"◇",title:"Map Lab",desc:"Learn states, territories and capitals",cls:"teal"},
 {id:"cards",icon:"▣",title:"Flashcards",desc:"Build recall with spaced repetition",cls:"purple"},
+{id:"game",icon:"⚡",title:"Keyword Forge",desc:"Match key terms and build recall streaks",cls:"green"},
+{id:"games",icon:"◈",title:"Games Lab",desc:"Sort, match and classify key citizenship concepts",cls:"cyan"},
 {id:"practice",icon:"◎",title:"Reinforce",desc:"Targeted practice to strengthen knowledge",cls:"orange"},
 {id:"mistakes",icon:"▧",title:"Mistakes",desc:"Review and master your weak areas",cls:"red"},
 {id:"values",icon:"♟",title:"Values Lab",desc:"Practise Australian Values scenarios",cls:"green"},
