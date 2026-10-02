@@ -1,6 +1,6 @@
 const modules=[
 {id:"learn",icon:"▤",title:"Learn",desc:"Study the key topics from Our Common Bond",cls:"blue"},
-{id:"visual",icon:"▥",title:"Infographics",desc:"Explore interactive visual guides",cls:"cyan"},
+{id:"visual",icon:"▥",title:"Infographics",desc:"Explore visual memory guides",cls:"cyan"},
 {id:"map",icon:"◇",title:"Map Lab",desc:"Learn states, territories and capitals",cls:"teal"},
 {id:"cards",icon:"▣",title:"Flashcards",desc:"Build recall with spaced repetition",cls:"purple"},
 {id:"game",icon:"⚡",title:"Keyword Forge",desc:"Match key terms and build recall streaks",cls:"green"},
