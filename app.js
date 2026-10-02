@@ -35,15 +35,15 @@ const Q=[
 ["values","A person strongly disagrees with a government decision. Which response reflects Australian values?",["Use violence","Peacefully protest within the law","Threaten officials","Stop others expressing views"],1,"Disagree → peaceful action → law"]
 ];
 const A=document.querySelector("#app");
-let state=JSON.parse(localStorage.getItem("atest2")||'{"known":{},"attempts":0,"scores":{}}');
+let state=JSON.parse(localStorage.getItem("atest2")||'{"known":{},"attempts":0,"scores":{},"stats":{},"mocks":[]}');state.stats=state.stats||{};state.mocks=state.mocks||[];
 let S=null,ci=0,flipped=false;
 function save(){localStorage.setItem("atest2",JSON.stringify(state))}
 function moduleCards(){
  return M.map(m=>'<article class="card module"><i>'+m.icon+'</i><h3>'+m.title+'</h3><p>'+m.desc+'</p></article>').join("");
 }
 function home(){
- const known=Object.values(state.known).filter(Boolean).length;
- A.innerHTML='<section class="hero"><div><div class="eyebrow">LEARN → VISUALISE → RECALL → REINFORCE</div><h1>Your citizenship<br>learning lab.</h1><p class="lead">Study the material first. Turn it into pictures, flashcards and retrieval practice until it sticks.</p><div class="actions"><button class="btn" data-v="learn">Start learning</button><button data-v="visual">Explore infographics</button></div></div><aside class="card gate"><span>FLASHCARD MASTERY</span><strong>'+known+' / '+CARDS.length+'</strong><div class="progress"><i style="width:'+(known/CARDS.length*100)+'%"></i></div><br><span>EXAM GATE</span><strong>15 / 20</strong><b>plus 5 / 5 values</b></aside></section><section class="grid">'+moduleCards()+'</section>';
+ const known=Object.values(state.known).filter(Boolean).length;const ms=mastery();const last=state.mocks[state.mocks.length-1];
+ A.innerHTML='<section class="readiness">'+ms.map(x=>'<div class="card meter '+(x.p&&x.p<75?"weak":"")+'"><span>'+M.find(m=>m.id===x.id).icon+' '+x.id+'</span><strong>'+x.p+'%</strong><div class="progress"><i style="width:'+x.p+'%"></i></div></div>').join("")+'</section><section class="hero"><div><div class="eyebrow">LEARN → VISUALISE → RECALL → REINFORCE</div><h1>Your citizenship<br>learning lab.</h1><p class="lead">Study the material first. Turn it into pictures, flashcards and retrieval practice until it sticks.</p><div class="actions"><button class="btn" data-v="learn">Start learning</button><button data-v="visual">Explore infographics</button></div></div><aside class="card gate"><span>FLASHCARD MASTERY</span><strong>'+known+' / '+CARDS.length+'</strong><div class="progress"><i style="width:'+(known/CARDS.length*100)+'%"></i></div><br><span>EXAM GATE</span><strong>15 / 20</strong><b>plus 5 / 5 values</b></aside></section><section class="grid">'+moduleCards()+'</section>';
 }
 function learn(){
  A.innerHTML='<div class="eyebrow">LEARNING MATERIAL</div><h2>Four testable parts</h2><p class="lead">Learn the concepts first, then reinforce them with visuals and retrieval.</p><div class="topics">'+M.map(m=>'<article class="card topic"><span class="tag">'+m.icon+' '+m.id.toUpperCase()+'</span><h3>'+m.title+'</h3><ul>'+LES[m.id].map(x=>'<li>'+x+'</li>').join("")+'</ul><div class="actions"><button class="btn" data-focus="'+m.id+'">Visualise</button><button data-p="'+m.id+'">Check recall</button></div></article>').join("")+'</div>';
@@ -63,10 +63,15 @@ function cards(){
  const c=CARDS[ci], known=!!state.known[ci];
  A.innerHTML='<div class="eyebrow">FLASHCARDS • '+(ci+1)+' / '+CARDS.length+'</div><section class="card flash"><span class="tag">'+c[2].toUpperCase()+'</span><div class="face">'+(flipped?c[1]:c[0])+'</div><p class="hint">'+(flipped?"Answer":"Think first, then reveal.")+'</p><div class="actions" style="justify-content:center"><button class="btn" data-flip>'+(flipped?"Show question":"Reveal answer")+'</button></div>'+(flipped?'<div class="actions" style="justify-content:center"><button data-rate="0">× Review again</button><button class="btn" data-rate="1">✓ I know this</button></div>':"")+'</section><div class="actions" style="justify-content:center"><button data-prev>← Previous</button><button data-next>Next →</button></div><p style="text-align:center;color:var(--muted)">'+(known?"✓ Marked known":"Not mastered yet")+'</p>';
 }
+const PLACES=[["South Australia","Adelaide"],["Victoria","Melbourne"],["Queensland","Brisbane"],["Western Australia","Perth"],["Tasmania","Hobart"],["New South Wales","Sydney"],["Northern Territory","Darwin"],["Australian Capital Territory","Canberra"]];
+function map(){A.innerHTML='<div class="eyebrow">MAP LAB</div><h2>States, territories & capitals</h2><p class="lead">Tap a jurisdiction, recall the capital, then reveal it.</p><div class="maplab"><div class="mapshape">'+PLACES.map((p,i)=>'<button class="statebtn" data-place="'+i+'">'+p[0]+'</button>').join("")+'</div><section class="card" id="place"><span class="tag">HANDS-ON RECALL</span><h2>Choose a state or territory</h2><p class="hint">Say the capital aloud before revealing it.</p></section></div>'}
+function place(i){document.querySelectorAll(".statebtn").forEach((b,n)=>b.classList.toggle("active",n===i));const p=PLACES[i];document.querySelector("#place").innerHTML='<span class="tag">'+p[0].toUpperCase()+'</span><h2>What is the capital?</h2><button class="btn" data-reveal="'+i+'">Reveal capital</button>'}
+function reveal(i){const p=PLACES[i];document.querySelector("#place").innerHTML='<span class="tag">'+p[0].toUpperCase()+'</span><div class="capital">'+p[1]+'</div><p>Lock the pair together: <b>'+p[0]+' → '+p[1]+'</b></p><button class="btn" data-v="map">Choose another</button>'}
+function mastery(){return M.map(m=>{const s=state.stats[m.id]||{c:0,t:0};return {id:m.id,p:s.t?Math.round(s.c/s.t*100):0}})}
 function practice(){
  A.innerHTML='<div class="eyebrow">REINFORCEMENT</div><h2>Retrieve, correct, repeat</h2><p class="lead">Wrong answers become signals for what to revisit.</p><section class="grid">'+M.map(m=>'<button class="card module" data-p="'+m.id+'"><i>'+m.icon+'</i><h3>'+m.title+'</h3><p>Focused retrieval drill</p></button>').join("")+'</section><div class="actions"><button class="btn" data-p="all">Mixed drill</button></div>';
 }
-function start(mode){
+function mock(){let values=Q.filter(x=>x[0]==="values");let other=Q.filter(x=>x[0]!=="values");let pool=[];while(pool.length<15)pool.push(other[pool.length%other.length]);while(values.length<5)values=values.concat(Q.filter(x=>x[0]==="values"));S={q:pool.slice(0,15).concat(values.slice(0,5)).sort(()=>Math.random()-.5),i:0,n:0,mode:"mock",valuesCorrect:0,valuesTotal:5};draw()}function start(mode){
  let q=mode==="all"?Q.slice():Q.filter(x=>x[0]===mode);
  S={q:q.sort(()=>Math.random()-.5),i:0,n:0,mode:mode};
  draw();
@@ -77,20 +82,20 @@ function draw(){
 }
 function answer(i){
  let q=S.q[S.i],ok=i===q[3];
- if(ok)S.n++;
+ if(ok){S.n++;if(S.mode==="mock"&&q[0]==="values")S.valuesCorrect++}const st=state.stats[q[0]]||{c:0,t:0};st.t++;if(ok)st.c++;state.stats[q[0]]=st;save();
  document.querySelectorAll(".choice").forEach((b,n)=>{b.disabled=true;if(n===q[3])b.classList.add("correct");else if(n===i)b.classList.add("wrong")});
  document.querySelector("#f").innerHTML='<div class="feedback"><b class="'+(ok?"good":"bad")+'">'+(ok?"✓ Correct":"✕ Not yet")+'</b><div class="visual">'+q[4]+'</div><button class="btn" id="next">'+(S.i===S.q.length-1?"Finish":"Next")+'</button></div>';
  document.querySelector("#next").onclick=()=>{S.i++;if(S.i>=S.q.length)finish();else draw()};
 }
 function finish(){
- const pct=Math.round(S.n/S.q.length*100);
+ const pct=Math.round(S.n/S.q.length*100);if(S.mode==="mock"){const vp=S.valuesCorrect===5,pass=S.n>=15&&vp;state.mocks.push({score:S.n,values:S.valuesCorrect,pass,date:new Date().toISOString()});state.mocks=state.mocks.slice(-10);save();A.innerHTML='<section class="card quiz"><div class="eyebrow">MOCK EXAM RESULT</div><h1>'+S.n+' / 20</h1><h2 class="'+(pass?"good":"bad")+'">'+(pass?"PASS STANDARD ✓":"NOT YET")+'</h2><div class="statrow"><div class="card stat"><strong>'+S.n+'</strong>overall</div><div class="card stat"><strong>'+S.valuesCorrect+' / 5'</strong>values</div><div class="card stat"><strong>'+(pass?"READY":"REVIEW")+'</strong>gate</div></div><p class="lead">'+(pass?"You met both mock pass conditions. Repeat this consistently before treating yourself as exam-ready.":"Review weak topics, especially values if below 5/5, then retest.")+'</p><button class="btn" data-v="home">Dashboard</button></section>';return;}
  state.attempts++;state.scores[S.mode]=pct;save();
  A.innerHTML='<section class="card quiz"><div class="eyebrow">REINFORCEMENT COMPLETE</div><h1>'+S.n+'/'+S.q.length+'</h1><h2 class="'+(pct>=75?"good":"bad")+'">'+pct+'%</h2><p class="lead">'+(pct>=75?"Strong retrieval. Keep spacing your reviews.":"Revisit the visual and flashcards for this topic, then retry.")+'</p><div class="actions"><button class="btn" data-v="learn">Review material</button><button data-v="practice">Train again</button></div></section>';
 }
 document.addEventListener("click",e=>{
  const v=e.target.closest("[data-v]"),f=e.target.closest("[data-focus]"),p=e.target.closest("[data-p]"),a=e.target.closest("[data-a]");
- if(v){const x=v.dataset.v;({home,learn,visual,cards,practice}[x]||home)()}
- else if(f)visual(f.dataset.focus);
+ if(v){const x=v.dataset.v;({home,learn,visual,map,cards,practice,mock}[x]||home)()}
+ else if(f)visual(f.dataset.focus);else if(e.target.closest("[data-place]"))place(+e.target.closest("[data-place]").dataset.place);else if(e.target.closest("[data-reveal]"))reveal(+e.target.closest("[data-reveal]").dataset.reveal);
  else if(p)start(p.dataset.p);
  else if(a)answer(+a.dataset.a);
  else if(e.target.closest("[data-flip]")){flipped=!flipped;cards()}
