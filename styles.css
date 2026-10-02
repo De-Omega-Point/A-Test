@@ -231,3 +231,13 @@ main>*{min-width:0}
 .story-detail{min-height:160px;border-left:4px solid var(--cyan)}
 @media(max-width:800px){.story-track{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.story-track{grid-template-columns:1fr}.story-node{min-height:78px}.story-detail{min-height:130px}}
+
+/* Deep Study Guide */
+.study-index{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.study-index-card{display:grid;grid-template-columns:52px 1fr;gap:14px;text-align:left;cursor:pointer}.study-index-card>span{font-size:38px}.study-index-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.study-insight{border-left:4px solid var(--gold);margin-bottom:18px}.study-insight p{font-size:19px;line-height:1.75}
+.lineage{position:relative;display:grid;gap:12px;margin:18px 0}.lineage:before{content:"";position:absolute;left:22px;top:20px;bottom:20px;width:2px;background:linear-gradient(var(--cyan),var(--green))}
+.lineage-step{position:relative;display:grid;grid-template-columns:46px 1fr;gap:16px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#082231}
+.lineage-step>span{position:relative;z-index:1;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#0b3c4d;border:2px solid var(--cyan);font-weight:900;color:var(--cyan)}
+.lineage-step h3{margin:2px 0 6px}.lineage-step p{margin:0;color:#c7d8df;line-height:1.7}.study-cue{border-color:var(--green);background:linear-gradient(135deg,#0b392b,#071c29)}
+@media(max-width:700px){.study-index{grid-template-columns:1fr}.study-index-card{grid-template-columns:40px 1fr}.study-index-card>span{font-size:30px}.study-insight p{font-size:16px}.lineage-step{grid-template-columns:38px 1fr;padding:14px;gap:11px}.lineage-step>span{width:38px;height:38px}.lineage:before{left:18px}}
