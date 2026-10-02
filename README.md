@@ -1,1 +1,1 @@
-# A-Test
+# A-Test 🇦🇺\n\nVisual, interactive Australian citizenship test trainer built for active recall.\n\n## V1\n- Four-part syllabus dashboard\n- Empowering dark teal, cyan and gold visual system\n- Focused and mixed interactive quizzes\n- Instant visual memory hooks\n- Australian-values mastery tracked separately\n- Responsive and dependency-free\n\nOpen `index.html` locally or deploy as a static site.\n\n> Independent study aid. Confirm current requirements with the Australian Department of Home Affairs.\n
