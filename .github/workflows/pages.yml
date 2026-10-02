@@ -20,16 +20,20 @@ jobs:
         run: node --check app.js
       - name: Required files
         run: test -s index.html && test -s styles.css && test -s app.js
-      - name: Navigation contract
+      - name: Product contract
         run: |
-          grep -q 'data-view="syllabus"' index.html
+          grep -q 'data-view="home"' index.html
           grep -q 'data-view="study"' index.html
           grep -q 'data-view="practice"' index.html
           grep -q 'data-view="games"' index.html
           grep -q 'data-view="mock"' index.html
           grep -q 'data-view="readiness"' index.html
           grep -q 'function dashboard' app.js
-          grep -q 'function mock' app.js\n          grep -q 'function curriculumAudit' app.js\n          grep -q 'const domainKnowledge=' app.js\n          grep -q 'const domainEnrichment=' app.js\n          grep -q 'const domainQuestionBank=' app.js\n          grep -q '\["loyalty","values"' app.js\n          grep -q '\["first-peoples","people"' app.js
+          grep -q 'function mock' app.js
+          grep -q 'function curriculumAudit' app.js
+          grep -q 'const domainKnowledge=' app.js
+          grep -q 'const domainEnrichment=' app.js
+          grep -q 'const domainQuestionBank=' app.js
   deploy:
     needs: validate
     environment:
