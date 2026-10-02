@@ -2,7 +2,16 @@
 (() => {
   'use strict';
   const KEY = 'atest-arcade-v1';
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  // Canvas compatibility for older mobile Safari/WebViews. Civic Dash should degrade gracefully, not vanish.
+  function roundedRect(ctx, x, y, w, h, r) {
+    if (typeof ctx.roundRect === 'function') { ctx.roundRect(x, y, w, h, r); return; }
+    const radius = Math.max(0, Math.min(Number(r) || 0, Math.abs(w) / 2, Math.abs(h) / 2));
+    ctx.moveTo(x + radius, y); ctx.lineTo(x + w - radius, y); ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius); ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius); ctx.quadraticCurveTo(x, y, x + radius, y);
+  }
   const worlds = [
     { part: 'people', name: 'Sunrise Coast', topic: 'Australia & its people', icon: '☀', sky: '#ffe7cb', hill: '#ffa985' },
     { part: 'rights', name: 'Together Town', topic: 'Rights & liberties', icon: '♡', sky: '#f6e0ef', hill: '#e99cc4' },
@@ -142,7 +151,8 @@
       app.addEventListener('click', e => this.click(e), { signal });
       document.addEventListener('keydown', e => this.key(e), { signal });
       document.addEventListener('visibilitychange', () => { if (document.hidden) this.pause('Your ride is safe. Resume when you are ready.'); }, { signal });
-      window.addEventListener('blur', () => this.pause('Your ride is safe. Resume when you are ready.'), { signal });
+      // visibilitychange is the reliable mobile lifecycle signal. Window blur fires for
+      // harmless browser/UI focus changes on some phones and caused surprise pause loops.
       for (const surface of [this.canvas, app.querySelector('.dash-lanes')]) {
         let pointer = null;
         const move = e => { if (this.phase !== 'running') return; const box = surface.getBoundingClientRect(); this.steer(Math.min(2, Math.max(0, Math.floor((e.clientX - box.left) / box.width * 3)))); };
@@ -150,7 +160,12 @@
         surface.addEventListener('pointermove', e => { if (e.pointerId === pointer) move(e); }, { signal });
         for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) surface.addEventListener(event, () => { pointer = null; }, { signal });
       }
-      this.resize = new ResizeObserver(() => this.fit()); this.resize.observe(this.canvas); this.fit();
+      if (typeof ResizeObserver === 'function') {
+        this.resize = new ResizeObserver(() => this.fit()); this.resize.observe(this.canvas);
+      } else {
+        this.onResize = () => this.fit(); window.addEventListener('resize', this.onResize, { signal });
+      }
+      this.fit();
       this.show(`<span class="dash-dialog-icon" aria-hidden="true">✦</span><span class="dash-kicker">MEET YOUR LITTLE STAR</span><h2 data-focus>Ready, Sunny?</h2><p>${this.kind === 'chill' ? 'Tap the lane with a star. Collect four to open a learning checkpoint. Take all the time you need.' : 'Slide left and right to collect gold stars. Dodge coral bumpers. Three shields keep you flying.'}</p><div class="dash-mini-legend"><span>✦ Collect</span><span>${this.kind === 'chill' ? '☁ No rush' : '▰ Dodge'}</span><span>♡ Learn</span></div><p class="dash-fine">The game always stops for questions. No rushed reading.</p><button class="dash-button dash-primary" data-dash-action="begin">${this.kind === 'chill' ? 'Start my chill ride' : "Let's fly"} →</button>`);
     }
     fit() { const b = this.canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2); if (!b.width || !b.height) return; this.canvas.width = Math.round(b.width * dpr); this.canvas.height = Math.round(b.height * dpr); this.width = 480; this.height = b.height / b.width * 480; this.ctx.setTransform(this.canvas.width / this.width, 0, 0, this.canvas.height / this.height, 0, 0); this.draw(); }
@@ -280,11 +295,11 @@
       for (const o of this.objects) {
         if (o.taken) continue; const p = project(o.lane, o.y);
         if (o.kind === 'star') this.star(p.x, p.y, 24 * p.scale, '#ffc850');
-        else { c.save(); c.translate(p.x, p.y); c.scale(p.scale, p.scale); c.fillStyle = '#dc583f'; c.beginPath(); c.roundRect(-28, -17, 56, 34, 10); c.fill(); c.fillStyle = '#fff1dc'; c.fillRect(-17, -4, 34, 7); c.fillStyle = '#b54238'; c.fillRect(-23, 14, 46, 5); c.restore(); }
+        else { c.save(); c.translate(p.x, p.y); c.scale(p.scale, p.scale); c.fillStyle = '#dc583f'; c.beginPath(); roundedRect(c, -28, -17, 56, 34, 10); c.fill(); c.fillStyle = '#fff1dc'; c.fillRect(-17, -4, 34, 7); c.fillStyle = '#b54238'; c.fillRect(-23, 14, 46, 5); c.restore(); }
       }
       const py = roadTop + .82 * (h - roadTop), px = w * (.5 + (this.x - .5) * 1.0);
       c.save(); c.globalAlpha = this.invulnerable > 0 ? .7 : 1; c.fillStyle = '#5e487c22'; c.beginPath(); c.ellipse(px, py + 34, 33, 8, 0, 0, Math.PI * 2); c.fill();
-      c.fillStyle = '#7760cf'; c.beginPath(); c.roundRect(px - 33, py + 19, 66, 12, 8); c.fill(); this.star(px, py - 6, 31, '#ffbf4f');
+      c.fillStyle = '#7760cf'; c.beginPath(); roundedRect(c, px - 33, py + 19, 66, 12, 8); c.fill(); this.star(px, py - 6, 31, '#ffbf4f');
       c.fillStyle = '#49384f'; for (const dx of [-8, 8]) { c.beginPath(); c.arc(px + dx, py - 9, 2.7, 0, Math.PI * 2); c.fill(); } c.strokeStyle = '#49384f'; c.lineWidth = 2; c.beginPath(); c.arc(px, py - 2, 6, 0, Math.PI); c.stroke(); c.restore();
       if (!reduced.matches) for (const p of this.particles) { c.globalAlpha = p.life * 2; c.fillStyle = '#9c661b'; c.font = 'bold 19px system-ui'; c.textAlign = 'center'; c.fillText('+ star', p.x * w, py - 48 - (1 - p.life * 2) * 25); } c.globalAlpha = 1;
     }
