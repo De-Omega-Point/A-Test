@@ -22,9 +22,12 @@ jobs:
         run: test -s index.html && test -s styles.css && test -s app.js
       - name: Navigation contract
         run: |
-          grep -q 'data-view="learn"' index.html
-          grep -q 'data-view="cards"' index.html
+          grep -q 'data-view="syllabus"' index.html
+          grep -q 'data-view="study"' index.html
+          grep -q 'data-view="practice"' index.html
+          grep -q 'data-view="games"' index.html
           grep -q 'data-view="mock"' index.html
+          grep -q 'data-view="readiness"' index.html
           grep -q 'function dashboard' app.js
           grep -q 'function mock' app.js
   deploy:
