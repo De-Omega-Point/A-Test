@@ -24,6 +24,7 @@ const CARDS=[
 ["Minimum overall test score?","15 out of 20","values"],
 ["Standard test time?","45 minutes","people"]
 ];
+const EXTRA=[["people","Which colours are Australia’s national colours?",["Blue and white","Green and gold","Red and blue","Black and gold"],1,"National colours → green + gold"],["people","Which flower is Australia’s national floral emblem?",["Waratah","Golden wattle","Sturt desert pea","Flannel flower"],1,"National floral emblem → golden wattle"],["rights","Which statement describes freedom of religion?",["Everyone must follow a religion","People may follow a religion or no religion","Only major religions are protected","Religious law replaces Australian law"],1,"Belief is free → Australian law still applies"],["rights","What does a fair go refer to?",["Guaranteed equal outcomes","Fair opportunity and mutual respect","Special treatment for citizens","Ignoring laws that seem unfair"],1,"Fair go → opportunity + respect"],["government","Which house is part of the Australian Parliament?",["House of Representatives","House of Governors","National Council","Federal Assembly"],0,"Parliament → House of Representatives + Senate"],["government","Who interprets and applies the law in cases?",["The media","The courts","Local councils","Political parties"],1,"Judicial power → courts"],["values","A colleague is treated unfairly because of their gender. Which principle is relevant?",["Equality of opportunity","Compulsory association","Religious authority","Violence"],0,"Equality → opportunity regardless of gender"],["values","Which is consistent with peaceful democratic participation?",["Threatening opponents","Voting and lawful peaceful protest","Destroying property","Preventing others voting"],1,"Democracy → vote + peaceful lawful participation"]];
 const Q=[
 ["people","Australia became a federation in which year?",["1788","1851","1901","1915"],2,"Six colonies → one Commonwealth → 1901"],
 ["people","What is Australia’s national capital?",["Sydney","Melbourne","Canberra","Adelaide"],2,"Australia → Canberra"],
@@ -34,8 +35,9 @@ const Q=[
 ["values","Which best reflects equality in Australia?",["Leadership preference by gender","Equal opportunity regardless of gender","Only citizens receive legal protection","Ignore discrimination law"],1,"Equal dignity → equal opportunity"],
 ["values","A person strongly disagrees with a government decision. Which response reflects Australian values?",["Use violence","Peacefully protest within the law","Threaten officials","Stop others expressing views"],1,"Disagree → peaceful action → law"]
 ];
+Q.push(...EXTRA);
 const A=document.querySelector("#app");
-let state=JSON.parse(localStorage.getItem("atest2")||'{"known":{},"attempts":0,"scores":{},"stats":{},"mocks":[]}');state.stats=state.stats||{};state.mocks=state.mocks||[];
+let state=JSON.parse(localStorage.getItem("atest2")||'{"known":{},"attempts":0,"scores":{},"stats":{},"mocks":[]}');state.stats=state.stats||{};state.mocks=state.mocks||[];state.missed=state.missed||{};state.review=state.review||{};
 let S=null,ci=0,flipped=false;
 function save(){localStorage.setItem("atest2",JSON.stringify(state))}
 function moduleCards(){
@@ -69,7 +71,8 @@ function place(i){document.querySelectorAll(".statebtn").forEach((b,n)=>b.classL
 function reveal(i){const p=PLACES[i];document.querySelector("#place").innerHTML='<span class="tag">'+p[0].toUpperCase()+'</span><div class="capital">'+p[1]+'</div><p>Lock the pair together: <b>'+p[0]+' → '+p[1]+'</b></p><button class="btn" data-v="map">Choose another</button>'}
 function mastery(){return M.map(m=>{const s=state.stats[m.id]||{c:0,t:0};return {id:m.id,p:s.t?Math.round(s.c/s.t*100):0}})}
 function practice(){
- A.innerHTML='<div class="eyebrow">REINFORCEMENT</div><h2>Retrieve, correct, repeat</h2><p class="lead">Wrong answers become signals for what to revisit.</p><section class="grid">'+M.map(m=>'<button class="card module" data-p="'+m.id+'"><i>'+m.icon+'</i><h3>'+m.title+'</h3><p>Focused retrieval drill</p></button>').join("")+'</section><div class="actions"><button class="btn" data-p="all">Mixed drill</button></div>';
+ const weak=mastery().filter(x=>x.p>0&&x.p<75).sort((a,b)=>a.p-b.p)[0];
+ A.innerHTML='<div class="eyebrow">REINFORCEMENT</div><h2>Retrieve, correct, repeat</h2><p class="lead">Wrong answers become signals for what to revisit.</p><section class="grid">'+M.map(m=>'<button class="card module" data-p="'+m.id+'"><i>'+m.icon+'</i><h3>'+m.title+'</h3><p>Focused retrieval drill</p></button>').join("")+'</section><div class="actions"><button class="btn" data-p="all">Mixed drill</button>'+(weak?'<button data-p="'+weak.id+'">Train weakest: '+weak.id+'</button>':'')+'</div>';
 }
 function mock(){let values=Q.filter(x=>x[0]==="values");let other=Q.filter(x=>x[0]!=="values");let pool=[];while(pool.length<15)pool.push(other[pool.length%other.length]);while(values.length<5)values=values.concat(Q.filter(x=>x[0]==="values"));S={q:pool.slice(0,15).concat(values.slice(0,5)).sort(()=>Math.random()-.5),i:0,n:0,mode:"mock",valuesCorrect:0,valuesTotal:5};draw()}function start(mode){
  let q=mode==="all"?Q.slice():Q.filter(x=>x[0]===mode);
@@ -82,7 +85,7 @@ function draw(){
 }
 function answer(i){
  let q=S.q[S.i],ok=i===q[3];
- if(ok){S.n++;if(S.mode==="mock"&&q[0]==="values")S.valuesCorrect++}const st=state.stats[q[0]]||{c:0,t:0};st.t++;if(ok)st.c++;state.stats[q[0]]=st;save();
+ if(ok){S.n++;if(S.mode==="mock"&&q[0]==="values")S.valuesCorrect++;delete state.missed[q[1]]}else{state.missed[q[1]]=(state.missed[q[1]]||0)+1}const st=state.stats[q[0]]||{c:0,t:0};st.t++;if(ok)st.c++;state.stats[q[0]]=st;save();
  document.querySelectorAll(".choice").forEach((b,n)=>{b.disabled=true;if(n===q[3])b.classList.add("correct");else if(n===i)b.classList.add("wrong")});
  document.querySelector("#f").innerHTML='<div class="feedback"><b class="'+(ok?"good":"bad")+'">'+(ok?"✓ Correct":"✕ Not yet")+'</b><div class="visual">'+q[4]+'</div><button class="btn" id="next">'+(S.i===S.q.length-1?"Finish":"Next")+'</button></div>';
  document.querySelector("#next").onclick=()=>{S.i++;if(S.i>=S.q.length)finish();else draw()};
