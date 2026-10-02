@@ -249,3 +249,8 @@ main>*{min-width:0}
 .page-rail button{flex:0 0 128px;min-height:72px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:12px 14px;border:1px solid #19536a;border-radius:13px;background:linear-gradient(145deg,#0b2b3b,#071b28);color:var(--ink);cursor:pointer;scroll-snap-align:start;text-align:left}
 .page-rail button:hover{border-color:var(--cyan);transform:translateY(-1px)}.page-rail button span{font-size:21px;color:var(--cyan)}.page-rail button b{font-size:13px}
 @media(max-width:600px){.page-rail-wrap{margin:8px 0 14px}.page-rail{margin-right:-10px}.page-rail button{flex-basis:105px;min-height:64px;padding:9px 10px}.page-rail button span{font-size:18px}.page-rail button b{font-size:11px}}
+
+/* Curriculum v2 coverage */
+.coverage-summary{margin-bottom:18px;border-color:var(--cyan)}.progress-bar{height:12px;background:#061722;border-radius:999px;overflow:hidden}.progress-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:inherit}
+.curriculum-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.curriculum-part h2{font-size:24px}.domain-list{display:grid;gap:7px;margin:14px 0}.domain-row{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid #123848}.domain-ok{color:var(--green);font-weight:900}.domain-open{color:#7894a3}
+@media(max-width:760px){.curriculum-grid{grid-template-columns:1fr}.curriculum-part h2{font-size:21px}}
