@@ -16,10 +16,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: JavaScript syntax check
-        run: node --check app.js
+      - name: JavaScript syntax checks
+        run: |
+          node --check app.js
+          node --check arcade.js
+          node --check tests/arcade-contract.cjs
       - name: Required files
-        run: test -s index.html && test -s styles.css && test -s app.js
+        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js
       - name: Product contract
         run: |
           grep -q 'data-view="home"' index.html
@@ -30,10 +33,16 @@ jobs:
           grep -q 'data-view="readiness"' index.html
           grep -q 'function dashboard' app.js
           grep -q 'function mock' app.js
-          grep -q 'function curriculumAudit' app.js\n          grep -q 'function studyResume' app.js\n          grep -q 'function adaptiveEvidence' app.js\n          grep -q 'function finishMock' app.js\n          grep -q 'function games' app.js
+          grep -q 'function curriculumAudit' app.js
+          grep -q 'function studyResume' app.js
+          grep -q 'function adaptiveEvidence' app.js
+          grep -q 'function finishMock' app.js
+          grep -q 'function games' app.js
           grep -q 'const domainKnowledge=' app.js
           grep -q 'const domainEnrichment=' app.js
           grep -q 'const domainQuestionBank=' app.js
+      - name: Arcade regression checks
+        run: node tests/arcade-contract.cjs
   deploy:
     needs: validate
     environment:

@@ -2,23 +2,21 @@
 <html lang="en-AU">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#06131e">
-  <title>A-Test | Learn • Practise • Belong</title>\n  <link rel="icon" type="image/png" href="assets/a-test-logo.png">\n  <link rel="apple-touch-icon" href="assets/a-test-logo.png">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fffaf4">
+  <title>A-Test | Learn • Practise • Belong</title>
+  <link rel="icon" type="image/png" href="assets/a-test-logo.png">
+  <link rel="apple-touch-icon" href="assets/a-test-logo.png">
   <link rel="stylesheet" href="styles.css?v=full-rebuild-v5-1">
+  <meta name="description" content="A happier path to Australian citizenship study. Learn, practise, play Civic Dash and track your progress.">
+  <link rel="stylesheet" href="arcade.css?v=thumb-v6">
 </head>
 <body>
+<a class="skip-link" href="#app">Skip to content</a>
+<div id="app-status" class="sr-only" role="status" aria-live="polite"></div>
 <header class="topbar">
   <button class="brand" data-view="home" aria-label="A-Test home">
-    <span class="brand-logo" aria-hidden="true"><img src="assets/a-test-logo.png" alt="">
-      <svg class="logo-fallback" viewBox="0 0 100 100" role="img">
-        <circle cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="5"/>
-        <path d="M24 72h20V55c-9-4-14-12-14-22 0-16 12-27 28-27 18 0 31 13 31 31 0 9-4 18-11 24v11h-17V47" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M42 66V43M58 69V28M73 60V39" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-        <circle cx="42" cy="39" r="6" fill="currentColor"/><circle cx="58" cy="23" r="6" fill="currentColor"/><circle cx="73" cy="34" r="6" fill="currentColor"/>
-        <path d="M18 80h64" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>
-    </span>
+    <span class="brand-emblem" aria-hidden="true">A<span>✦</span></span>
     <span class="brand-copy"><strong><span>A-</span>TEST</strong><small>LEARN • PRACTISE • BELONG</small></span>
   </button>
   <nav class="nav" aria-label="Primary navigation">
@@ -30,12 +28,14 @@
     <button data-view="readiness">◉<span>Progress</span></button>
   </nav>
 </header>
-<main id="app"></main>
+<main id="app" tabindex="-1"></main>
+<noscript><p style="padding:24px">A-Test needs JavaScript for interactive study and games. Please enable it in your browser.</p></noscript>
 <footer class="footer">
   <span><b>A-TEST</b> · Learn · Practise · Belong</span>
   <span>Australian Citizenship Study Companion</span>
   <span>Respect · Opportunity · A Fair Go 🇦🇺</span>
 </footer>
-<script src="app.js?v=full-rebuild-v5-1"></script>
+<script src="app.js?v=full-rebuild-v5-1" defer></script>
+<script src="arcade.js?v=thumb-v6" defer></script>
 </body>
 </html>
