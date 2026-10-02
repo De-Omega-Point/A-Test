@@ -212,6 +212,8 @@
       this.elapsed += dt; this.invulnerable = Math.max(0, this.invulnerable - dt);
       this.x += ([.2, .5, .8][this.lane] - this.x) * Math.min(1, dt * 20);
       if (this.elapsed >= (this.checkpoint + 1) * 10) { this.openCheckpoint(); return; }
+      // Distance is the visual heartbeat of the ride. Keep it independent of object spawns.
+      this.roadTravel = (this.roadTravel || 0) + dt * 180;
       this.spawnIn -= dt;
       if (this.spawnIn <= 0) {
         this.spawnIn = .8 - this.checkpoint * .06;
@@ -285,11 +287,26 @@
       const w = this.width, h = this.height, theme = worlds[this.world], roadTop = h * .12;
       c.clearRect(0, 0, w, h); c.fillStyle = theme.sky; c.fillRect(0, 0, w, h);
       c.fillStyle = '#fff6d8'; c.beginPath(); c.arc(w * .82, h * .13, 43, 0, Math.PI * 2); c.fill();
-      for (let i = 0; i < 3; i++) { const x = (i * 190 + 35 + (reduced.matches || this.kind === 'chill' ? 0 : this.elapsed * 4)) % 590 - 55; this.cloud(x, h * (.08 + i * .055)); }
+      for (let i = 0; i < 3; i++) {
+        const drift = this.kind === 'chill' ? 0 : (this.roadTravel || this.elapsed * 180) * .08;
+        const x = (i * 190 + 35 - drift) % 590 - 55; this.cloud(x, h * (.08 + i * .055));
+      }
       c.fillStyle = theme.hill; c.beginPath(); c.moveTo(0, h * .38); c.quadraticCurveTo(w * .2, h * .05, w * .45, h * .35); c.quadraticCurveTo(w * .75, h * .1, w, h * .3); c.lineTo(w, h); c.lineTo(0, h); c.fill();
       c.fillStyle = '#fffaf3'; c.beginPath(); c.moveTo(w * .37, roadTop); c.lineTo(w * .63, roadTop); c.lineTo(w * .99, h); c.lineTo(w * .01, h); c.closePath(); c.fill();
       c.strokeStyle = '#e4dbe9'; c.lineWidth = 2;
-      for (const v of [1 / 3, 2 / 3]) { c.setLineDash([8, 15]); c.lineDashOffset = reduced.matches || this.kind === 'chill' ? 0 : -this.elapsed * 90; c.beginPath(); c.moveTo(w * (.37 + .26 * v), roadTop); c.lineTo(w * (.01 + .98 * v), h); c.stroke(); } c.setLineDash([]);
+      // Moving cross-markers make forward flight readable even when no collectible is nearby.
+      if (this.kind !== 'chill') {
+        const travel = (this.roadTravel || this.elapsed * 180) % 92;
+        c.strokeStyle = '#eadfea'; c.lineWidth = 2;
+        for (let y = roadTop - 92 + travel; y < h; y += 92) {
+          const p = Math.max(0, Math.min(1, (y - roadTop) / Math.max(1, h - roadTop)));
+          const half = w * (.13 + .36 * p);
+          c.globalAlpha = .22 + .32 * p;
+          c.beginPath(); c.moveTo(w * .5 - half, y); c.lineTo(w * .5 + half, y); c.stroke();
+        }
+        c.globalAlpha = 1;
+      }
+      for (const v of [1 / 3, 2 / 3]) { c.setLineDash([8, 15]); c.lineDashOffset = this.kind === 'chill' ? 0 : -(this.roadTravel || this.elapsed * 180); c.beginPath(); c.moveTo(w * (.37 + .26 * v), roadTop); c.lineTo(w * (.01 + .98 * v), h); c.stroke(); } c.setLineDash([]);
       const project = (lane, y) => ({ x: w * (.5 + (lane - 1) * (.10 + Math.max(0, y) * .244)), y: roadTop + y * (h - roadTop), scale: .42 + Math.max(0, y) * .68 });
       if (this.kind === 'chill' && this.phase === 'running') { const p = project(this.target, .5); this.star(p.x, p.y, 27, '#ffc850'); }
       for (const o of this.objects) {
