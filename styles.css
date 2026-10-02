@@ -254,3 +254,5 @@ main>*{min-width:0}
 .coverage-summary{margin-bottom:18px;border-color:var(--cyan)}.progress-bar{height:12px;background:#061722;border-radius:999px;overflow:hidden}.progress-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:inherit}
 .curriculum-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.curriculum-part h2{font-size:24px}.domain-list{display:grid;gap:7px;margin:14px 0}.domain-row{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid #123848}.domain-ok{color:var(--green);font-weight:900}.domain-open{color:#7894a3}
 @media(max-width:760px){.curriculum-grid{grid-template-columns:1fr}.curriculum-part h2{font-size:21px}}
+
+.domain-button{width:100%;border:0;background:none;color:inherit;text-align:left;cursor:pointer}.domain-button:hover{background:#0d3141;border-radius:8px}.domain-study{max-width:860px;margin:auto}.domain-study .lead{font-size:20px;line-height:1.8}
