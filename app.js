@@ -25,7 +25,7 @@ const domainKnowledge={
 "gender":{part:"rights",title:"Gender equality",teach:"Men and women have equal rights in Australia.",cue:"equal rights regardless of gender"},
 "fair-go":{part:"rights",title:"Fair go",teach:"A fair go is associated with equality of opportunity, fairness and mutual respect.",cue:"fair opportunity, not guaranteed equal outcomes"},
 "responsibilities":{part:"rights",title:"Responsibilities of citizenship",teach:"Responsibilities include obeying Australian laws, voting when required, serving on a jury when called and eligible, and defending Australia should the need arise.",cue:"law · vote · jury · defend"},
-"privileges":{part:"rights",title:"Privileges of citizenship",teach:"Privileges include applying for an Australian passport, seeking election when eligible, certain public service or defence employment and consular assistance overseas.",cue:"passport · stand for office · consular help"},
+"privileges":{part:"rights",title:"Privileges of citizenship",teach:"Privileges include applying for an Australian passport and re-entering Australia freely, seeking election when eligible, applying for APS/ADF work, consular assistance overseas, and applying for eligible children born overseas to become citizens by descent.",cue:"passport · stand for office · consular help"},
 "participation":{part:"rights",title:"Participation and taxation",teach:"Citizens are encouraged to participate in community life. Taxation helps fund government services and infrastructure.",cue:"participate + contribute"},
 "say":{part:"government",title:"Voting and secret ballot",teach:"Eligible citizens enrol and vote. Voting is by secret ballot so an individual’s choice is private.",cue:"vote is compulsory when required; choice is secret"},
 "aec":{part:"government",title:"Australian Electoral Commission",teach:"The Australian Electoral Commission administers federal elections and referendums and maintains the electoral roll.",cue:"AEC → elections · referendums · electoral roll"},
@@ -35,7 +35,7 @@ const domainKnowledge={
 "head-state":{part:"government",title:"Head of State and Governor-General",teach:"Australia is a constitutional monarchy. The King is Australia’s Head of State and the Governor-General represents the King at the Commonwealth level.",cue:"King → Head of State · Governor-General → representative"},
 "parliament":{part:"government",title:"Australian Parliament",teach:"The Australian Parliament includes the House of Representatives and the Senate.",cue:"House + Senate"},
 "leaders":{part:"government",title:"Political leaders",teach:"The Prime Minister leads the Australian Government; Premiers lead state governments; Chief Ministers lead territory governments; mayors lead many local councils.",cue:"PM · Premier · Chief Minister · Mayor"},
-"levels":{part:"government",title:"Three levels",teach:"Federal government handles national matters, states and territories major regional services, and local councils community-level services.",cue:"national · regional · local"},
+"levels":{part:"government",title:"Three levels",teach:"Federal government handles matters such as taxation, immigration, defence, trade, communications, social security and foreign affairs; states and territories handle services such as hospitals, schools, police, roads and public transport; local government handles services such as local roads, parks, rubbish, libraries, building permits and local environmental issues.",cue:"national · regional · local"},
 "parties":{part:"government",title:"Parties and Opposition",teach:"Elected representatives may belong to political parties or be independents. The party or coalition with sufficient support forms government; other major parliamentary forces form the Opposition.",cue:"government vs Opposition"},
 "ministers":{part:"government",title:"Ministers and Cabinet",teach:"Ministers are responsible for government portfolios. Senior ministers form Cabinet and make major government decisions.",cue:"portfolio → minister · senior ministers → Cabinet"},
 "laws":{part:"government",title:"Making laws",teach:"A proposed law is a Bill. Parliament considers Bills and Royal Assent is part of the process by which a passed Bill becomes law.",cue:"Bill → Parliament → Royal Assent → law"},
@@ -50,7 +50,7 @@ const domainKnowledge={
 "community":{part:"values",title:"Community contribution",teach:"Compassion, mateship, volunteering and contributing to the community are valued parts of Australian society.",cue:"help · contribute · volunteer"},
 "english":{part:"values",title:"English language",teach:"English is Australia’s national language and is an important unifying element in Australian society.",cue:"English → national language"},
 "safety":{part:"values",title:"Community safety and cyber abuse",teach:"Violence, threats and abuse are inconsistent with community safety. Cyber abuse can use technology to threaten, intimidate, harass or humiliate.",cue:"online harm still counts as abuse"},
-"loyalty":{part:"values",title:"Loyalty and obligations",teach:"Australian citizens pledge loyalty to Australia and its people and share civic obligations. Dual citizens may also have obligations under another country’s laws.",cue:"citizenship → loyalty + continuing obligations"}
+"loyalty":{part:"values",title:"Loyalty and obligations",teach:"Australian citizens pledge loyalty to Australia and its people and must not undermine Australia’s interests and security. Australian law applies within Australia, and some Australian laws also apply to citizens overseas. Dual citizens may additionally have obligations under another country’s laws.",cue:"citizenship → loyalty + continuing obligations"}
 };
 const domainEnrichment={
 "first-peoples":["Citizenship knowledge begins with recognising that Australia’s human story predates European settlement by many thousands of years.","A Welcome to Country is delivered by a Traditional Custodian; an Acknowledgement of Country can be offered by others.","Do not treat 1788 as the beginning of Australian human history.","FIRST PEOPLES → continuing cultures → Country"],
@@ -96,6 +96,30 @@ const domainEnrichment={
 "safety":["Community safety principles apply online as well as offline.","Repeated threatening or humiliating messages intended to harm can be cyber abuse.","Online behaviour is not automatically harmless because it is digital.","DIGITAL HARM IS STILL HARM"],
 "loyalty":["Citizenship includes a commitment to Australia and its people alongside legal obligations.","The citizenship pledge expresses loyalty to Australia and its people.","Dual citizenship does not mean Australian law can simply be ignored.","LOYALTY + OBLIGATIONS"]
 };
+const officialCoverageChecklist=[
+["first-peoples","First Peoples, oldest continuous cultures and diverse Indigenous cultures"],
+["settlement","First Fleet 26 January 1788, British/Irish heritage, 1851 gold rush and migration"],
+["states","Six states, two mainland territories, all capitals, Canberra national institutions"],
+["traditions","Welcome to Country vs Acknowledgement of Country, Australia Day, Anzac Day"],
+["flags","National Flag, Aboriginal Flag, Torres Strait Islander Flag and their symbolism"],
+["symbols","Commonwealth Coat of Arms, golden wattle, green and gold, opal, Advance Australia Fair"],
+["responsibilities","Vote, obey law, defend Australia if needed, jury service"],
+["privileges","APS/ADF employment, seek election, passport/re-entry, consular help, citizenship by descent"],
+["participation","Community participation, volunteering, political participation, work and taxation"],
+["say","Enrolment, compulsory voting, federal/state/territory elections, referenda, secret ballot"],
+["aec","Electoral roll, federal elections and referendums"],
+["referendum","Constitutional change by referendum and required majority rules"],
+["levels","Detailed federal, state/territory and local government responsibilities"],
+["parties","Political parties, independents, government and Opposition"],
+["laws","Bills, both houses, Royal Assent, state/territory law-making"],
+["courts","Independent courts, judges, magistrates, presumption of innocence and juries"],
+["police","Police maintain peace/order, arrest and court process, AFP federal role"],
+["law-types","Criminal law, domestic/family violence and traffic law"],
+["community","Community contribution, compassion, volunteering and mateship"],
+["english","English national language while other languages are valued"],
+["safety","Violence, online/cyber abuse, community safety and respectful conduct"],
+["loyalty","Loyalty, obeying Australian law, overseas legal obligations, national interests/security"]
+];
 const testableGlossary=[["Constitution","Australia’s supreme law and framework for government."],["constitutional monarchy","A monarch is Head of State and powers are limited by the Constitution."],["coalition","Two or more political parties joining to form government or Opposition."],["commission","A group with an official responsibility."],["criminal trial","A court hearing deciding whether a person is guilty or not guilty."],["cyber abuse","Using technology to threaten, intimidate, harass or humiliate with intent to harm."],["democracy","Government by the people through elected representatives."],["Federation","Six colonies joining as the Commonwealth of Australia in 1901."],["jury","Citizens who hear evidence and decide facts in some court cases."],["referendum","A vote on a proposed change to the Australian Constitution."],["rule of law","Everyone is subject to Australian law."],["secret ballot","A voting system where each person’s vote is private."]];
 const modules=[
 {id:"learn",icon:"▤",title:"Learn",desc:"Study the key topics from Our Common Bond",cls:"blue"},
