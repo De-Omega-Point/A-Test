@@ -256,3 +256,5 @@ main>*{min-width:0}
 @media(max-width:760px){.curriculum-grid{grid-template-columns:1fr}.curriculum-part h2{font-size:21px}}
 
 .domain-button{width:100%;border:0;background:none;color:inherit;text-align:left;cursor:pointer}.domain-button:hover{background:#0d3141;border-radius:8px}.domain-study{max-width:860px;margin:auto}.domain-study .lead{font-size:20px;line-height:1.8}
+
+.evidence{margin:16px 0;padding:13px 15px;border:1px solid #28546a;border-radius:12px;background:#071a26}.evidence b{display:block;color:var(--cyan)}.evidence small{display:block;margin-top:4px;color:var(--muted)}
