@@ -86,3 +86,59 @@ linear-gradient(145deg,#12395a,#041421 68%)}
   .brand-logo img{max-width:54px;max-height:54px}
   .hero-logo img{max-width:125px;max-height:125px}
 }
+
+/* Responsive navigation + layout hardening */
+.topbar{min-width:0}
+.nav{min-width:0;scrollbar-width:thin;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.nav:after{content:"";flex:0 0 14px}
+.nav button{flex:0 0 auto}
+.feature-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.hero-main,.hero-main>div{min-width:0}
+.hero h1{overflow-wrap:anywhere}
+@media(max-width:1200px){
+  .topbar{grid-template-columns:1fr;padding-bottom:6px}
+  .nav{justify-content:flex-start;width:100%;padding-bottom:6px}
+  .nav button{min-width:84px}
+  .hero{grid-template-columns:1fr .7fr;gap:18px}
+  .hero-logo{width:170px}
+  .hero h1{font-size:72px}
+  .tagline{font-size:17px;letter-spacing:.2em}
+  .promise{font-size:15px}
+}
+@media(max-width:900px){
+  main{padding:22px 20px 48px}
+  .hero{grid-template-columns:1fr}
+  .hero-art{min-height:190px}
+  .pillars{grid-template-columns:1fr 1fr}
+  .pillar{border-right:0;border-bottom:1px solid #123e50}
+  .dashboard-lower{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .topbar{position:sticky;padding:8px 12px 4px;gap:6px}
+  .brand-logo{width:46px;height:46px}
+  .brand-copy strong{font-size:21px}
+  .brand-copy small{font-size:7px;letter-spacing:.18em}
+  .nav{margin:0 -12px;width:calc(100% + 24px);padding:2px 12px 8px;gap:4px}
+  .nav button{min-width:68px;padding:8px 6px;font-size:15px}
+  .nav button span{font-size:10px}
+  main{padding:16px 12px 36px}
+  .hero{min-height:auto;padding:18px 4px}
+  .hero-main{grid-template-columns:auto 1fr;gap:14px}
+  .hero-logo{width:82px}
+  .hero h1{font-size:42px}
+  .tagline{font-size:11px;letter-spacing:.1em;margin-top:9px}
+  .promise{font-size:10px;letter-spacing:.08em;margin-top:10px}
+  .hero-art{display:none}
+  .pillars{gap:4px;padding:10px 0}
+  .pillar{padding:8px 6px}.pillar i{font-size:22px}.pillar b{font-size:14px}.pillar small{font-size:10px}
+  .feature-grid{grid-template-columns:1fr;gap:10px}
+  .feature{min-height:90px;padding:15px;grid-template-columns:42px 1fr 20px}
+  .feature .icon{font-size:29px}.feature h3{font-size:19px}.feature p{font-size:13px}.feature .go{font-size:26px}
+  .panel{padding:16px}
+  .progress-grid{grid-template-columns:1fr 1fr}
+  .ring{width:78px;height:78px}.ring strong{font-size:18px}
+  .page-head h2{font-size:30px}
+  .question{font-size:22px}
+  .footer{padding:18px 14px;gap:8px}
+}
