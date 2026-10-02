@@ -61,8 +61,9 @@ function diagram(id){
  if(id==="values") return '<h2>Australian values decision filter</h2><div class="flow"><span class="node">Is it lawful?</span><span class="arrow">→</span><span class="node">Is it peaceful?</span><span class="arrow">→</span><span class="node">Does it respect dignity & equality?</span></div><div class="visual">Values are a hard gate: 5 / 5.</div>';
  return '<h2>Government: two different sets of three</h2><h3>Three powers</h3><div class="flow"><span class="node">Legislative<br><small>makes laws</small></span><span class="arrow">→</span><span class="node">Executive<br><small>puts laws into action</small></span><span class="arrow">→</span><span class="node">Judicial<br><small>interprets and applies law</small></span></div><h3>Three levels</h3><div class="flow"><span class="node">Federal<br><small>national matters</small></span><span class="node">State / territory<br><small>regional services</small></span><span class="node">Local<br><small>local services</small></span></div>';
 }
+function reviewQueue(){return CARDS.map((c,i)=>({i,c,d:state.review[i]||0,k:!!state.known[i]})).sort((a,b)=>(a.k-b.k)||(a.d-b.d))}
 function cards(){
- const c=CARDS[ci], known=!!state.known[ci];
+ const queue=reviewQueue();if(queue.length&&ci===0)ci=queue[0].i;const c=CARDS[ci], known=!!state.known[ci];
  A.innerHTML='<div class="eyebrow">FLASHCARDS • '+(ci+1)+' / '+CARDS.length+'</div><section class="card flash"><span class="tag">'+c[2].toUpperCase()+'</span><div class="face">'+(flipped?c[1]:c[0])+'</div><p class="hint">'+(flipped?"Answer":"Think first, then reveal.")+'</p><div class="actions" style="justify-content:center"><button class="btn" data-flip>'+(flipped?"Show question":"Reveal answer")+'</button></div>'+(flipped?'<div class="actions" style="justify-content:center"><button data-rate="0">× Review again</button><button class="btn" data-rate="1">✓ I know this</button></div>':"")+'</section><div class="actions" style="justify-content:center"><button data-prev>← Previous</button><button data-next>Next →</button></div><p style="text-align:center;color:var(--muted)">'+(known?"✓ Marked known":"Not mastered yet")+'</p>';
 }
 const PLACES=[["South Australia","Adelaide"],["Victoria","Melbourne"],["Queensland","Brisbane"],["Western Australia","Perth"],["Tasmania","Hobart"],["New South Wales","Sydney"],["Northern Territory","Darwin"],["Australian Capital Territory","Canberra"]];
@@ -70,9 +71,12 @@ function map(){A.innerHTML='<div class="eyebrow">MAP LAB</div><h2>States, territ
 function place(i){document.querySelectorAll(".statebtn").forEach((b,n)=>b.classList.toggle("active",n===i));const p=PLACES[i];document.querySelector("#place").innerHTML='<span class="tag">'+p[0].toUpperCase()+'</span><h2>What is the capital?</h2><button class="btn" data-reveal="'+i+'">Reveal capital</button>'}
 function reveal(i){const p=PLACES[i];document.querySelector("#place").innerHTML='<span class="tag">'+p[0].toUpperCase()+'</span><div class="capital">'+p[1]+'</div><p>Lock the pair together: <b>'+p[0]+' → '+p[1]+'</b></p><button class="btn" data-v="map">Choose another</button>'}
 function mastery(){return M.map(m=>{const s=state.stats[m.id]||{c:0,t:0};return {id:m.id,p:s.t?Math.round(s.c/s.t*100):0}})}
+function mistakes(){const keys=Object.keys(state.missed).sort((a,b)=>state.missed[b]-state.missed[a]);if(!keys.length){A.innerHTML='<section class="card quiz"><div class="eyebrow">MISTAKE REVIEW</div><h2>Clean slate ✓</h2><p class="lead">No unresolved mistakes. Keep testing to generate useful signals.</p><button class="btn" data-v="practice">Reinforce</button></section>';return}A.innerHTML='<div class="eyebrow">MISTAKE REVIEW</div><h2>Turn errors into assets</h2><p class="lead">These are questions you missed and have not yet recovered.</p><div class="topics">'+keys.map(k=>'<article class="card weak"><span class="tag">'+state.missed[k]+' MISS'+(state.missed[k]>1?"ES":"")+'</span><h3>'+k+'</h3><p>Find this concept in the relevant lesson or run an adaptive drill.</p></article>').join("")+'</div><div class="actions"><button class="btn" data-adaptive>Train my mistakes</button></div>'}
+function valuesLab(){const v=Q.filter(x=>x[0]==="values");S={q:v.sort(()=>Math.random()-.5),i:0,n:0,mode:"values",valuesCorrect:0};draw()}
+function adaptive(){const missed=Object.keys(state.missed);let q=Q.filter(x=>missed.includes(x[1]));if(!q.length){practice();return}S={q:q.sort((a,b)=>(state.missed[b[1]]||0)-(state.missed[a[1]]||0)),i:0,n:0,mode:"adaptive"};draw()}
 function practice(){
  const weak=mastery().filter(x=>x.p>0&&x.p<75).sort((a,b)=>a.p-b.p)[0];
- A.innerHTML='<div class="eyebrow">REINFORCEMENT</div><h2>Retrieve, correct, repeat</h2><p class="lead">Wrong answers become signals for what to revisit.</p><section class="grid">'+M.map(m=>'<button class="card module" data-p="'+m.id+'"><i>'+m.icon+'</i><h3>'+m.title+'</h3><p>Focused retrieval drill</p></button>').join("")+'</section><div class="actions"><button class="btn" data-p="all">Mixed drill</button>'+(weak?'<button data-p="'+weak.id+'">Train weakest: '+weak.id+'</button>':'')+'</div>';
+ A.innerHTML='<div class="eyebrow">REINFORCEMENT</div><h2>Retrieve, correct, repeat</h2><p class="lead">Wrong answers become signals for what to revisit.</p><section class="grid">'+M.map(m=>'<button class="card module" data-p="'+m.id+'"><i>'+m.icon+'</i><h3>'+m.title+'</h3><p>Focused retrieval drill</p></button>').join("")+'</section><div class="actions"><button class="btn" data-p="all">Mixed drill</button><button data-v="mistakes">Mistake review</button><button data-v="valuesLab">Values scenario lab</button>'+(weak?'<button data-p="'+weak.id+'">Train weakest: '+weak.id+'</button>':'')+'</div>';
 }
 function mock(){let values=Q.filter(x=>x[0]==="values");let other=Q.filter(x=>x[0]!=="values");let pool=[];while(pool.length<15)pool.push(other[pool.length%other.length]);while(values.length<5)values=values.concat(Q.filter(x=>x[0]==="values"));S={q:pool.slice(0,15).concat(values.slice(0,5)).sort(()=>Math.random()-.5),i:0,n:0,mode:"mock",valuesCorrect:0,valuesTotal:5};draw()}function start(mode){
  let q=mode==="all"?Q.slice():Q.filter(x=>x[0]===mode);
@@ -97,13 +101,13 @@ function finish(){
 }
 document.addEventListener("click",e=>{
  const v=e.target.closest("[data-v]"),f=e.target.closest("[data-focus]"),p=e.target.closest("[data-p]"),a=e.target.closest("[data-a]");
- if(v){const x=v.dataset.v;({home,learn,visual,map,cards,practice,mock}[x]||home)()}
+ if(v){const x=v.dataset.v;({home,learn,visual,map,cards,practice,mock,mistakes,valuesLab}[x]||home)()}
  else if(f)visual(f.dataset.focus);else if(e.target.closest("[data-place]"))place(+e.target.closest("[data-place]").dataset.place);else if(e.target.closest("[data-reveal]"))reveal(+e.target.closest("[data-reveal]").dataset.reveal);
  else if(p)start(p.dataset.p);
  else if(a)answer(+a.dataset.a);
  else if(e.target.closest("[data-flip]")){flipped=!flipped;cards()}
  else if(e.target.closest("[data-next]")){ci=(ci+1)%CARDS.length;flipped=false;cards()}
  else if(e.target.closest("[data-prev]")){ci=(ci-1+CARDS.length)%CARDS.length;flipped=false;cards()}
- else if(e.target.closest("[data-rate]")){state.known[ci]=e.target.closest("[data-rate]").dataset.rate==="1";save();ci=(ci+1)%CARDS.length;flipped=false;cards()}
+ else if(e.target.closest("[data-rate]")){const yes=e.target.closest("[data-rate]").dataset.rate==="1";state.known[ci]=yes;state.review[ci]=Date.now()+(yes?3*86400000:0);save();const q=reviewQueue();ci=q[0]?q[0].i:(ci+1)%CARDS.length;flipped=false;cards()}else if(e.target.closest("[data-adaptive]"))adaptive()
 });
 home();
