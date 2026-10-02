@@ -266,3 +266,6 @@ main>*{min-width:0}
 .stage-verified{border-color:#28e178}.stage-building{border-color:#f4c651}.stage-understood{border-color:#a75cff}.stage-seen{border-color:#329dff}
 .mastery-heatmap{display:grid;gap:6px}.heat-cell{display:grid;grid-template-columns:24px 1fr;gap:7px;align-items:center;padding:8px;border-radius:8px;border:1px solid #173e50;background:#071925;color:#c7d7df;text-align:left;cursor:pointer}.heat-cell span{font-size:12px}.heat-cell.verified{border-color:#28e178;background:#0b3524}.heat-cell.building{border-color:#f4c651;background:#342e12}.heat-cell.understood{border-color:#a75cff;background:#2a1e3b}.heat-cell.seen{border-color:#329dff;background:#102d46}.heat-cell:hover{filter:brightness(1.15)}.next-path{margin-top:16px;border-color:var(--gold)}
 @media(max-width:700px){.stage-grid{grid-template-columns:repeat(2,1fr)}.stage-grid .stage-card:last-child{grid-column:1/-1}.stage-card{padding:10px}.stage-card b{font-size:22px}}
+
+.depth-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.depth-grid section{padding:15px;border:1px solid #19485b;border-radius:13px;background:#071b28}.depth-grid section p{margin:7px 0 0;line-height:1.7;color:#cfdee5}.depth-grid section:nth-child(3){border-color:#ff8c6655}.depth-grid section:nth-child(4){border-color:#28e17866}
+@media(max-width:650px){.depth-grid{grid-template-columns:1fr}}
