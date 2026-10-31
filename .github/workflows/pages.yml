@@ -31,6 +31,7 @@ jobs:
           node --check tests/study-contract.cjs
           node --check v3-content.js
           node --check v3-intelligence.js
+          node --check lesson-resources.js
           node --check tests/v3-exam-contract.cjs
           node --check tests/v3-content-contract.cjs
           node --check tests/official-content-contract.cjs
