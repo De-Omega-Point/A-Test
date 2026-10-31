@@ -61,6 +61,17 @@ with site() as url, sync_playwright() as p:
     browser = p.chromium.launch(**options)
     try:
         page, errors = mount(browser, url)
+        # Accessibility and release evidence checks against the served site.
+        check('Page language is Australian English', page.locator('html').get_attribute('lang') == 'en-AU')
+        check('Main content landmark exists', page.locator('main#app').count() == 1)
+        check('Primary navigation has an accessible label', page.locator('nav[aria-label="Primary navigation"]').count() == 1)
+        check('Skip-to-content shortcut exists', page.locator('a.skip-link[href="#app"]').count() == 1)
+        check('Official PDF is actually served by the same app origin', (
+            page.request.get(url.rstrip('/')+'/assets/our-common-bond-testable.pdf').status == 200
+        ))
+        page.evaluate("route('study')")
+        check('Syllabus is visible', page.locator('#study-syllabus').count() == 1)
+        check('Booklet shortcut is available', page.locator('#official-booklet-shortcut [data-booklet-open]').count() == 1)
         for view in ['home', 'study', 'practice', 'games', 'readiness', 'readings', 'learn', 'glossary', 'visual', 'map', 'cards', 'syllabus', 'audit']:
             page.evaluate('(view) => route(view)', view)
             check(f'{view}: content renders', bool(page.locator('#app').inner_text().strip()))
