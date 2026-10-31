@@ -5,6 +5,10 @@ This is automated accessibility testing, not human VoiceOver/NVDA certification.
 import json
 import os
 from pathlib import Path
+from contextlib import contextmanager
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
 from urllib.request import Request, urlopen
 from playwright.sync_api import sync_playwright
 
@@ -24,6 +28,20 @@ def fetch(path, limit=500000):
         check("HTTP 200: "+path,response.status==200)
         return response.read(limit),response.headers.get("Content-Type","")
 
+@contextmanager
+def serve_checkout():
+    class Quiet(SimpleHTTPRequestHandler):
+        def log_message(self,*args):
+            pass
+    server=ThreadingHTTPServer(("127.0.0.1",0),partial(Quiet,directory=str(Path.cwd().parent)))
+    thread=Thread(target=server.serve_forever,daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_port}/A-Test"
+    finally:
+        server.shutdown()
+        server.server_close()
+
 print("PUBLIC SITE",BASE,flush=True)
 manifest_bytes,_=fetch("release-status.json")
 manifest=json.loads(manifest_bytes)
@@ -38,12 +56,14 @@ check("Published source is a valid PDF header",pdf.startswith(b"%PDF-"))
 
 axe_file=Path("node_modules/axe-core/axe.min.js")
 check("axe-core audit library installed",axe_file.is_file())
-with sync_playwright() as pw:
+with serve_checkout() as local_url, sync_playwright() as pw:
+    tested_url=BASE if os.environ.get("ATEST_AUDIT_TARGET")=="live" else local_url
+    print("ACCESSIBILITY TARGET",tested_url,flush=True)
     browser=pw.chromium.launch(headless=True)
     page=browser.new_page(viewport={"width":390,"height":844},reduced_motion="reduce")
     page_errors=[]
     page.on("pageerror",lambda error:page_errors.append(str(error)))
-    response=page.goto(BASE+"/#study",wait_until="domcontentloaded",timeout=30000)
+    response=page.goto(tested_url+"/#study",wait_until="domcontentloaded",timeout=30000)
     check("Chromium receives public site",response and response.status==200)
     page.locator("#study-syllabus").wait_for(timeout=20000)
     check("Syllabus visible in real public app",page.locator("#study-syllabus").count()==1)
@@ -66,12 +86,14 @@ with sync_playwright() as pw:
     unnamed=[n for n in nodes if n.get("role",{}).get("value")=="button" and not n.get("ignored") and not str(n.get("name",{}).get("value","")).strip()]
     check("Interactive buttons have accessible names",len(unnamed)==0)
 
+    serious_problems=[]
     def audit(label):
         page.add_script_tag(content=axe_file.read_text(encoding="utf-8"))
         result=page.evaluate("""async () => await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})""")
         issues=[{"id":v["id"],"impact":v.get("impact"),"description":v.get("description"),"nodes":[n.get("target") for n in v.get("nodes",[])][:8]} for v in result["violations"]]
         print("AXE AUDIT",label,json.dumps(issues,ensure_ascii=False),flush=True)
-        check(label+": no serious or critical WCAG issues",not any(v.get("impact") in ("serious","critical") for v in issues))
+        serious=[v for v in issues if v.get("impact") in ("serious","critical")]
+        if serious: serious_problems.append({"view":label,"issues":serious})
         return issues
 
     study_issues=audit("Study syllabus")
@@ -99,5 +121,6 @@ with sync_playwright() as pw:
 
     check("No JavaScript errors on public learning journey",len(page_errors)==0)
     print("ACCESSIBILITY SUMMARY",json.dumps({"study":study_issues,"lesson":lesson_issues,"reader":reader_issues},ensure_ascii=False),flush=True)
+    check("No serious/critical WCAG violations in tested build",not serious_problems)
     browser.close()
 print("PUBLIC RELEASE AND ACCESSIBILITY CHECKS PASSED:",len(checks),flush=True)
