@@ -423,7 +423,9 @@
     draw() {
       const c = this.ctx; if (!c) return;
       const w = this.width, h = this.height, theme = worlds[this.world], roadTop = h * .12;
-      c.clearRect(0, 0, w, h); c.fillStyle = theme.sky; c.fillRect(0, 0, w, h);
+      c.clearRect(0, 0, w, h); c.save();
+      if (effectsEnabled() && this.shake > 0) c.translate(Math.sin(this.elapsed * 110) * this.shake * 14, 0);
+      c.fillStyle = theme.sky; c.fillRect(0, 0, w, h);
       c.fillStyle = '#fff6d8'; c.beginPath(); c.arc(w * .82, h * .13, 43, 0, Math.PI * 2); c.fill();
       for (let i = 0; i < 3; i++) {
         const drift = this.kind === 'chill' ? 0 : (this.roadTravel || this.elapsed * 180) * .08;
@@ -450,13 +452,41 @@
       for (const o of this.objects) {
         if (o.taken) continue; const p = project(o.lane, o.y);
         if (o.kind === 'star') this.star(p.x, p.y, 24 * p.scale, '#ffc850');
+        else if (o.kind === 'boost') this.boostIcon(p.x, p.y, p.scale);
         else { c.save(); c.translate(p.x, p.y); c.scale(p.scale, p.scale); c.fillStyle = '#dc583f'; c.beginPath(); roundedRect(c, -28, -17, 56, 34, 10); c.fill(); c.fillStyle = '#fff1dc'; c.fillRect(-17, -4, 34, 7); c.fillStyle = '#b54238'; c.fillRect(-23, 14, 46, 5); c.restore(); }
       }
       const py = roadTop + .82 * (h - roadTop), px = w * (.5 + (this.x - .5) * 1.0);
+      if (effectsEnabled() && this.kind !== 'chill') for (const p of this.trail) {
+        c.globalAlpha = Math.max(0, Math.min(.42, p.life * .8));
+        c.fillStyle = '#a68aea';
+        c.beginPath(); c.arc(p.x * w, py + 4, 12 + (1 - p.life) * 15, 0, Math.PI * 2); c.fill();
+      }
+      c.globalAlpha = 1;
       c.save(); c.globalAlpha = this.invulnerable > 0 ? .7 : 1; c.fillStyle = '#5e487c22'; c.beginPath(); c.ellipse(px, py + 34, 33, 8, 0, 0, Math.PI * 2); c.fill();
       c.fillStyle = '#7760cf'; c.beginPath(); roundedRect(c, px - 33, py + 19, 66, 12, 8); c.fill(); this.star(px, py - 6, 31, '#ffbf4f');
       c.fillStyle = '#49384f'; for (const dx of [-8, 8]) { c.beginPath(); c.arc(px + dx, py - 9, 2.7, 0, Math.PI * 2); c.fill(); } c.strokeStyle = '#49384f'; c.lineWidth = 2; c.beginPath(); c.arc(px, py - 2, 6, 0, Math.PI); c.stroke(); c.restore();
-      if (!reduced.matches) for (const p of this.particles) { c.globalAlpha = p.life * 2; c.fillStyle = '#9c661b'; c.font = 'bold 19px system-ui'; c.textAlign = 'center'; c.fillText('+ star', p.x * w, py - 48 - (1 - p.life * 2) * 25); } c.globalAlpha = 1;
+      if (effectsEnabled()) for (const p of this.particles) {
+        c.globalAlpha = Math.max(0, Math.min(.9, p.life / p.maxLife));
+        c.fillStyle = p.colour;
+        c.beginPath(); c.arc(p.x * w, p.y * h, p.size, 0, Math.PI * 2); c.fill();
+      }
+      c.globalAlpha = 1;
+      if (effectsEnabled() && this.flash > 0) {
+        c.fillStyle = 'rgba(255, 246, 184, ' + Math.min(.08, this.flash * .3) + ')';
+        c.fillRect(0, 0, w, h);
+      }
+      c.restore();
+    }
+    boostIcon(x, y, scale) {
+      const c = this.ctx;
+      c.save(); c.translate(x, y); c.scale(scale, scale);
+      if (effectsEnabled()) { c.shadowBlur = 12; c.shadowColor = '#20cdbb'; }
+      c.fillStyle = '#158e99'; c.beginPath();
+      c.moveTo(0, -31); c.lineTo(26, 0); c.lineTo(0, 31); c.lineTo(-26, 0); c.closePath(); c.fill();
+      c.shadowBlur = 0; c.strokeStyle = '#d6fff3'; c.lineWidth = 3; c.stroke();
+      c.fillStyle = '#e8fff3'; c.font = 'bold 22px system-ui';
+      c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('+', 0, 1);
+      c.restore();
     }
     cloud(x, y) { const c = this.ctx; c.fillStyle = '#ffffffb8'; c.beginPath(); c.ellipse(x, y, 34, 10, 0, 0, Math.PI * 2); c.ellipse(x - 10, y - 8, 14, 13, 0, 0, Math.PI * 2); c.ellipse(x + 9, y - 6, 19, 14, 0, 0, Math.PI * 2); c.fill(); }
     star(x, y, radius, color) { const c = this.ctx; c.fillStyle = color; c.beginPath(); for (let i = 0; i < 10; i++) { const angle = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? radius * .48 : radius; const px = x + Math.cos(angle) * r, py = y + Math.sin(angle) * r; if (i) c.lineTo(px, py); else c.moveTo(px, py); } c.closePath(); c.fill(); }
