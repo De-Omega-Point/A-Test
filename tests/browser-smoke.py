@@ -45,7 +45,7 @@ def mount(browser, url, width=390, height=844):
         page.evaluate("Object.defineProperty(window,'localStorage',{value:{values:{},getItem(k){return this.values[k]??null},setItem(k,v){this.values[k]=String(v)}}})")
         for filename in ['styles.css', 'arcade.css', 'study-ui.css']:
             page.add_style_tag(content=(ROOT/filename).read_text())
-        for filename in ['storage.js', 'app.js', 'study-ui.js', 'arcade.js']:
+        for filename in ['storage.js', 'v3-content.js', 'v3-intelligence.js', 'app.js', 'study-ui.js', 'arcade.js']:
             page.add_script_tag(content=(ROOT/filename).read_text())
         page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
     else:
@@ -67,7 +67,7 @@ with site() as url, sync_playwright() as p:
             check(f'{view}: no mobile overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
         page.evaluate("route('study')")
         page.locator('[data-section="study-library"]').click()
-        page.wait_for_timeout(1200)
+        page.wait_for_function("() => { const el=document.querySelector('#study-library'); return el && el.getBoundingClientRect().top < 180 && el.getBoundingClientRect().bottom > 0; }", timeout=12000)
         check('Section jump preserves Study', page.locator('.study-parts').count() == 1)
         check('Section jump reaches library', page.locator('#study-library').bounding_box()['y'] < 180)
         check('In-page menu remains sticky', 0 <= page.locator('.onpage-nav').bounding_box()['y'] < 100)
@@ -102,6 +102,41 @@ with site() as url, sync_playwright() as p:
         check('Practice feedback appears', bool(page.locator('#feedback').inner_text()))
         page.locator('#next').click()
         check('Practice advances', page.evaluate('session.i') == 1)
+        # V3 review screen: genuine controls and persisted review record.
+        # Accessible study interactions and post-refresh persistence.
+        page.evaluate("route('domain/federation')")
+        check('Deep learning includes accessible reveal', page.locator('details summary').count() >= 1)
+        page.locator('details summary').first.focus()
+        page.keyboard.press('Enter')
+        check('Keyboard can reveal a learning explanation', page.locator('details[open]').count() >= 1)
+        page.evaluate("route('practice')")
+        check('Revision intelligence is labelled', page.locator('[aria-label="Revision intelligence"]').count() == 1)
+        page.evaluate("state.domains['federation']=2;save()")
+        if not INLINE:
+            page.reload()
+            page.locator('.build-label').wait_for()
+            check('Existing domain progress survives refresh', page.evaluate("state.domains['federation']") >= 2)
+        page.evaluate("route('practice')")
+        check('V3 adaptive action visible', page.locator('[data-v3-adaptive]').count() == 1)
+        check('V3 due-review action visible', page.locator('[data-v3-due]').count() == 1)
+        page.evaluate("route('topic/people')")
+        first_review_question = page.evaluate('session.q[session.i][1]')
+        correct = page.evaluate('session.q[session.i][3]')
+        wrong = (correct + 1) % page.evaluate('session.q[session.i][2].length')
+        page.locator(f'[data-answer="{wrong}"]').click()
+        check('Wrong answer is recorded for spaced review', page.evaluate('(q) => !!v3ReadReviews()[q] && v3ReadReviews()[q].correct === false', first_review_question))
+        check('Original progress record survives V3 review', page.evaluate("!!localStorage.getItem('atest-state')"))
+        page.evaluate("route('practice')")
+        check('Practice screen shows unresolved review', 'unresolved question' in page.locator('#app').inner_text())
+        page.locator('[data-v3-adaptive]').click()
+        check('Adaptive practice starts a question session', page.locator('[data-answer]').count() >= 2)
+        # Values hard-gate acceptance: a high overall score cannot compensate for a values error.
+        page.evaluate("route('mock');session.score=19;session.valuesCorrect=4;finishMock()")
+        check('19/20 with 4/5 values fails', page.evaluate('state.mocks.at(-1).pass') is False)
+        page.evaluate("route('mock');session.score=15;session.valuesCorrect=5;finishMock()")
+        check('15/20 with 5/5 values passes', page.evaluate('state.mocks.at(-1).pass') is True)
+        page.evaluate("route('practice')")
+        check('No V3 runtime errors before mock', not errors)
         page.evaluate("route('mock')")
         for _ in range(20):
             answer = page.evaluate('session.q[session.i][3]')
@@ -120,10 +155,13 @@ with site() as url, sync_playwright() as p:
         page.locator('[data-dash-start]').first.click()
         page.locator('[data-dash-action="begin"]').click()
         page.wait_for_timeout(250)
-        travel_a = page.evaluate('active && active.roadTravel')
+        # The game keeps its active session private. Test rendered frames,
+        # rather than reaching inside its closure for undocumented state.
+        check('Adventure canvas is visible', page.locator('#dash-canvas').is_visible())
+        frame_a = page.locator('#dash-canvas').evaluate('(canvas) => canvas.toDataURL()')
         page.wait_for_timeout(850)
-        travel_b = page.evaluate('active && active.roadTravel')
-        check('Adventure visibly advances flight distance', travel_b > travel_a + 50)
+        frame_b = page.locator('#dash-canvas').evaluate('(canvas) => canvas.toDataURL()')
+        check('Adventure canvas animates across frames', frame_a != frame_b)
         check('Adventure game loop is running', page.locator('.dash-game').count() == 1 and page.locator('#dash-overlay[hidden]').count() == 1)
         page.locator('[data-dash-action="pause"]').click()
         check('Adventure pauses once without glitch loop', 'Cloud break' in page.locator('#dash-overlay').inner_text())

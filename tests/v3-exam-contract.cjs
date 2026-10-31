@@ -1,0 +1,24 @@
+// V3 exam intelligence contract: node tests/v3-exam-contract.cjs
+'use strict';
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert').strict;
+const root=path.resolve(__dirname,'..');const saved=new Map();
+const context=vm.createContext({localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},Date,console});
+vm.runInContext(fs.readFileSync(path.join(root,'v3-intelligence.js'),'utf8'),context);
+const run=x=>vm.runInContext(x,context);
+run("var questions=[['values','Respect others?', ['Yes','No'],0,'Respect others'],['people','Federation year?', ['1901','1788'],0,'1901']];var questionDomainMap={'Respect others?':'respect','Federation year?':'federation'};var state={domainEvidence:{}};");
+run("v3RecordReview(questions[0],false,1000000000)");
+assert.equal(run("v3ReadReviews()['Respect others?'].streak"),0);
+assert.equal(run("v3ReadReviews()['Respect others?'].misses"),1);
+assert.equal(run("v3ReadReviews()['Respect others?'].due"),1000600000);
+run("v3RecordReview(questions[0],true,1000600000)");
+assert.equal(run("v3ReadReviews()['Respect others?'].streak"),1);
+assert.equal(run("v3ReadReviews()['Respect others?'].due"),1000600000+86400000);
+assert.equal(run("v3DueQuestions(1000600000+86400000).length"),1);
+assert.equal(run("v3AdaptiveQuestions(2,1000600000+86400000).length"),2);
+assert.ok(saved.has('atest-v3-review'));
+assert.ok(!saved.has('atest-state'),'V3 must not overwrite existing progress data');
+const a=fs.readFileSync(path.join(root,'app.js'),'utf8');
+assert.ok(a.includes('session.score>=15&&session.valuesCorrect===5'),'Both exam gates remain mandatory');
+assert.ok(a.includes('add(nonValues,15);add(values,5)'),'Mock still selects exactly five values questions');
+assert.ok(a.includes('v3RecordReview(q,ok)'),'Answer events record spaced review');
+console.log('V3 exam intelligence contract passed');

@@ -1,21 +1,26 @@
 name: Validate and deploy A-Test
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "dev/aus-test-v3-deep-learning"]
   workflow_dispatch:
+  pull_request:
+    branches: ["main"]
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: JavaScript syntax checks
         run: |
           node --check app.js
@@ -24,8 +29,13 @@ jobs:
           node --check study-ui.js
           node --check tests/arcade-contract.cjs
           node --check tests/study-contract.cjs
+          node --check v3-content.js
+          node --check v3-intelligence.js
+          node --check tests/v3-exam-contract.cjs
+          node --check tests/v3-content-contract.cjs
+          node --check tests/official-content-contract.cjs
       - name: Required files
-        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css
+        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs
       - name: Product contract
         run: |
           grep -q 'data-view="home"' index.html
@@ -48,6 +58,11 @@ jobs:
         run: node tests/arcade-contract.cjs
       - name: Study regression checks
         run: node tests/study-contract.cjs
+      - name: V3 deep-learning regression checks
+        run: |
+          node tests/v3-content-contract.cjs
+          node tests/v3-exam-contract.cjs
+          node tests/official-content-contract.cjs
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -58,7 +73,14 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Test the served application in Chromium
         run: python tests/browser-smoke.py
+      - name: Validation summary
+        if: always()
+        run: |
+          echo '### AUS-TEST V3 checks' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Branch: ${{ github.ref_name }}' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment is restricted to main.' >> "$GITHUB_STEP_SUMMARY"
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
     environment:
       name: github-pages

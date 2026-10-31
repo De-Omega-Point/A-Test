@@ -7,3 +7,20 @@
    both sticky navigation bars. clip preserves sticky positioning. */
 html,body{overflow-x:clip}html{scroll-padding-top:0}.study-resume>.btn{flex:0 0 auto;min-height:48px;height:auto;padding:12px 20px;align-self:center}
 @media(max-width:760px){.study-resume>.btn{align-self:stretch}.study-resume{gap:14px}.study-resume h2{margin-bottom:8px}}
+
+/* Accessible, responsive V3 learning syllabus */
+#study-syllabus{margin:18px 0}
+.syllabus-steps{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.syllabus-steps span{padding:8px 12px;border-radius:12px;background:#f1eafc;color:#392f55;font-weight:650}
+.syllabus-list{display:grid;gap:10px}
+.syllabus-part{border:1px solid #ded6eb;border-radius:14px;padding:10px 14px}
+.syllabus-part summary{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 0}
+.syllabus-part summary span{font-size:.85rem;color:#5c536a}
+.syllabus-part ol{margin:10px 0;padding-left:24px}
+.syllabus-item{padding:12px 0;border-top:1px solid #e7e0eb;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.syllabus-item div{min-width:0;flex:1}
+.syllabus-item small{display:block;margin-top:4px;color:#625b6a}
+.syllabus-item p{margin:5px 0 0;font-size:.92rem}
+.syllabus-item .btn{flex-shrink:0}
+@media(max-width:520px){.syllabus-item{align-items:flex-start;flex-direction:column}.syllabus-item .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){#study-syllabus *,#study-syllabus *::before,#study-syllabus *::after{scroll-behavior:auto!important;transition:none!important}}
