@@ -37,7 +37,17 @@ jobs:
           node --check tests/v3-content-contract.cjs
           node --check tests/official-content-contract.cjs
       - name: Required files
-        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs && test -s lesson-resources.js && test -s booklet-reader.js
+        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs && test -s lesson-resources.js && test -s booklet-reader.js && test -s assets/our-common-bond-testable.pdf
+      - name: Local booklet PDF integrity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('assets/our-common-bond-testable.pdf')
+          b=p.read_bytes()
+          assert b.startswith(b'%PDF-') and b'%%EOF' in b[-4096:], 'Invalid PDF'
+          assert 10_000_000 < len(b) < 25_000_000, 'Unexpected PDF size'
+          print('Local official booklet verified:',len(b),'bytes')
+          PY
       - name: Product contract
         run: |
           grep -q 'data-view="home"' index.html
