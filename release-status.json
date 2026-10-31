@@ -1,0 +1,8 @@
+{
+  "app": "AUS-TEST",
+  "version": "3.0",
+  "release": "2026-10-31-v3-syllabus",
+  "syllabusTopics": 42,
+  "expectedRoute": "#study",
+  "notes": "Release marker proves GitHub Pages is serving the current main branch when reachable at /A-Test/release-status.json"
+}
