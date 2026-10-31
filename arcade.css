@@ -13,3 +13,41 @@ body.dash-active{overflow:hidden;background:#f2eafb}.dash-active .topbar,.dash-a
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.dash-float-message.pop{opacity:1}.mode-card:hover,.dash-world:hover,.dash-primary:hover{transform:none}}
 
 .dash-toolbar button:disabled{opacity:.4}.mode-card.aqua{background:#e7efff}.curriculum-grid .curriculum-part:nth-child(4n+3){background:#ecebff}
+
+
+/* Civic Dash Spark Edition: rewarding effects with accessible comfort controls. */
+.dash-badge-section{margin:16px 0 22px;padding:16px;border-radius:20px;background:linear-gradient(135deg,#f5eeff,#fff8e9);border:1px solid #e5d6f4}
+.dash-badges-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.dash-badges-heading strong{font-size:12px;letter-spacing:.07em;color:#42306e}
+.dash-badges-heading>span{color:#594a6f;font-size:12px;font-weight:700}
+.dash-badges{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.dash-badge{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 7px;background:#fff;border-radius:14px;border:1px solid #e8ddeb;text-align:center;min-width:0}
+.dash-badge-symbol{font-size:28px;line-height:1.35}
+.dash-badge strong{font-size:11px;line-height:1.3;color:#382b54}
+.dash-badge small{font-size:10px;line-height:1.3;color:#655874}
+.dash-badge.locked{opacity:.67;filter:saturate(.65)}
+.dash-badge.locked .dash-badge-symbol{color:#77658d}
+.dash-badge.unlocked{border-color:#d6b3ea;background:linear-gradient(145deg,#fff,#fff7d9);box-shadow:0 3px 12px #6a4c8d13}
+.dash-settings{flex-wrap:wrap}
+.dash-mini-legend{flex-wrap:wrap;gap:8px 14px}
+.dash-boost-banner{flex:none;min-height:20px;padding:2px 9px;text-align:center;background:#e2f7f0;color:#175c62;border-top:1px solid #b1e6d9;font-size:10px;font-weight:750;letter-spacing:.015em}
+.dash-float-message.pop{width:max-content;max-width:calc(100% - 28px);left:50%;right:auto;transform:translateX(-50%);padding:7px 14px;background:#fffef0;color:#5a3882;border:1px solid #e9d3a5;border-radius:999px;box-shadow:0 6px 24px #694c8222;animation:dash-spark-pop 1.4s both}
+@keyframes dash-spark-pop{0%{opacity:0;transform:translate(-50%,9px) scale(.92)}16%,70%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px) scale(1.02)}}
+.dash-bop{animation:dash-bop .25s ease-out}
+@keyframes dash-bop{0%{transform:scale(.92)}60%{transform:scale(1.13)}100%{transform:scale(1)}}
+.dash-dialog{isolation:isolate}
+.dash-confetti{position:absolute;inset:0 0 auto;pointer-events:none;overflow:hidden;height:150px;z-index:-1}
+.dash-confetti i{--dx:calc((var(--i) - 5) * 11px);display:block;position:absolute;top:6px;left:calc(10% + var(--i)*6.5%);width:8px;height:13px;border-radius:3px;opacity:0;background:#e6a647;animation:dash-confetti-fall 1.05s ease-out both;animation-delay:calc(var(--i)*28ms)}
+.dash-confetti i:nth-child(3n){background:#7fcac0}.dash-confetti i:nth-child(3n+1){background:#ab88d9}
+@keyframes dash-confetti-fall{0%{opacity:0;transform:translate(0,-20px) rotate(0)}25%{opacity:.95}100%{opacity:0;transform:translate(var(--dx),135px) rotate(160deg)}}
+.dash-game-recap{font-size:13px;font-weight:750;color:#513d78;margin:9px 0 16px}
+.dash-new-badges{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:12px;margin:15px 0;border-radius:15px;border:1px solid #e6ccab;background:#fff8e8;color:#51355c}
+.dash-new-badges strong{width:100%;font-size:13px}
+.dash-new-badges span{border:1px solid #e6d7ed;border-radius:20px;padding:6px 10px;background:#fff;font-weight:750;font-size:12px}
+.dash-pause-settings{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.dash-pause-settings button{min-height:44px;border:1px solid #d8c7e6;border-radius:11px;background:#fff;color:#463168;font-size:12px;font-weight:750;padding:9px 12px}
+.dash-pause-settings button[aria-pressed=true]{background:#ece0ff;border-color:#a991d0}
+.dash-game button:focus-visible,.dash-badge:focus-visible{outline:3px solid #6240b2;outline-offset:3px}
+@media(max-width:720px){.dash-badges{grid-template-columns:repeat(3,minmax(0,1fr))}.dash-badge{padding:9px 7px}.dash-badge small{font-size:10px}}
+@media(max-width:390px){.dash-badges{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-boost-banner{font-size:9px}.dash-badge-section{padding:12px}}
+@media(prefers-reduced-motion:reduce){.dash-bop,.dash-confetti i,.dash-float-message.pop{animation:none!important;transition:none!important}.dash-float-message.pop{opacity:1;transform:translate(-50%,0)}.dash-confetti{display:none}}
