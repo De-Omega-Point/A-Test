@@ -131,8 +131,12 @@ with serve_checkout() as local_url, sync_playwright() as pw:
     # Return and open local reader; use its controls and status announcements.
     page.locator('.domain-study [data-booklet-open]').first.click()
     page.locator(".booklet-reader").wait_for(timeout=10000)
-    src=page.locator(".booklet-reader iframe").get_attribute("src") or ""
-    check("Reader frames same-origin booklet",src.startswith("/A-Test/assets/our-common-bond-testable.pdf#page="))
+    check("Reader avoids embedded PDF plugins",page.locator(".booklet-reader iframe").count()==0)
+    check("Reader renders all 50 source PDF page images",page.locator(".booklet-page img").count()==50)
+    check("Reader uses same-origin static page images",page.locator("#booklet-pdf-page-9 img").get_attribute("src")=="assets/booklet-pages/page-009.jpg")
+    page.locator("#booklet-pdf-page-9").scroll_into_view_if_needed()
+    page.wait_for_function("() => { const img=document.querySelector('#booklet-pdf-page-9 img'); return img && img.complete && img.naturalWidth>0; }")
+    check("Booklet image loads actual pixels",page.locator("#booklet-pdf-page-9 img").evaluate("(img)=>img.naturalWidth>0"))
     check("Reader announces page progress",page.locator('#booklet-status[role="status"][aria-live="polite"]').count()==1)
     page.locator("#booklet-notes").fill("Testing accessible personal notes")
     page.locator("[data-booklet-notes]").click()
