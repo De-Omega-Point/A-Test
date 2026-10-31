@@ -45,4 +45,14 @@ check(ui.includes('sectionScroll(section,true)'),'Section links scroll instead o
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 check(html.indexOf('src="storage.js')<html.indexOf('src="app.js'),'Safe storage loads before the legacy application');
 check(html.indexOf('src="study-ui.js')<html.indexOf('src="arcade.js'),'Repairs load before the arcade starts');
+// V3 acceptance: values are a hard gate independently of the overall score.
+f=fixture();f.run('mock();session.score=19;session.valuesCorrect=4;finishMock()');
+check(f.run('state.mocks[0].pass')===false,'19/20 with 4/5 values is NOT a pass');
+f=fixture();f.run('mock();session.score=15;session.valuesCorrect=5;finishMock()');
+check(f.run('state.mocks[0].pass')===true,'15/20 with 5/5 values meets mock pass standard');
+f=fixture();f.run('openDomain("federation")');
+check(f.app.innerHTML.includes('Explain it back'),'Deep learning appears on the live domain screen');
+f.run('practice()');check(f.app.innerHTML.includes('data-v3-adaptive'),'Adaptive practice action is visible');
+f.run('v3RecordReview(questions.find(q=>q[0]==="values"),false,Date.now()-700000)');
+check(f.run('v3DueQuestions().length')>=1,'Missed question becomes due for spaced review');
 console.log(`${checks} study repair checks passed.`);
