@@ -15,9 +15,12 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: JavaScript syntax checks
         run: |
           node --check app.js
@@ -68,6 +71,12 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Test the served application in Chromium
         run: python tests/browser-smoke.py
+      - name: Validation summary
+        if: always()
+        run: |
+          echo '### AUS-TEST V3 checks' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Branch: ${{ github.ref_name }}' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production deployment is restricted to main.' >> "$GITHUB_STEP_SUMMARY"
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
