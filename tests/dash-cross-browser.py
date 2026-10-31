@@ -41,6 +41,9 @@ def validate(engine, url, width, height):
     assert page.evaluate("JSON.parse(localStorage.getItem('atest-arcade-v1')).effects") is False
     effects.click()
     assert effects.get_attribute('aria-pressed')=='true'
+    if width==320:
+        assert page.locator('.dash-mode.selected').get_attribute('data-dash-mode')=='chill', 'Reduced-motion defaults to Chill'
+    page.locator('[data-dash-mode="adventure"]').click()
     page.locator('[data-dash-start]').first.click()
     page.locator('[data-dash-action="begin"]').click()
     page.locator('#dash-canvas').wait_for()
