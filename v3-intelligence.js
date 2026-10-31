@@ -21,10 +21,18 @@ function v3AdaptiveQuestions(limit=10,now=Date.now()){
  due.filter(q=>history[q[1]]?.misses>0).forEach(add);
  due.filter(q=>q[0]==='values').forEach(add);
  due.forEach(add);
- const weak=questions.filter(q=>{const d=questionDomainMap[q[1]],ev=d&&state.domainEvidence[d];return !ev||ev.t<3||ev.t&&(ev.c/ev.t)<.75});
+ // Rotate within each non-due priority tier: unseen first, then least recently
+ // answered. Reuse existing review timestamps; selection must not write progress.
+ // Stable ties retain bank order, so the same history produces the same session.
+ const rotated=questions.slice().sort((a,b)=>{
+  const x=history[a[1]],y=history[b[1]];
+  if(!x||!y)return Number(!!x)-Number(!!y);
+  return (Number(x.last)||0)-(Number(y.last)||0);
+ });
+ const weak=rotated.filter(q=>{const d=questionDomainMap[q[1]],ev=d&&state.domainEvidence[d];return !ev||ev.t<3||ev.t&&(ev.c/ev.t)<.75});
  weak.filter(q=>q[0]==='values').forEach(add);
  weak.forEach(add);
- questions.forEach(add);
+ rotated.forEach(add);
  return result;
 }
 function v3ReviewPanel(){
