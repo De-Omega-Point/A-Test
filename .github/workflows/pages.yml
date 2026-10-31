@@ -33,6 +33,7 @@ jobs:
           node --check v3-intelligence.js
           node --check tests/v3-exam-contract.cjs
           node --check tests/v3-content-contract.cjs
+          node --check tests/official-content-contract.cjs
       - name: Required files
         run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs
       - name: Product contract
@@ -61,6 +62,7 @@ jobs:
         run: |
           node tests/v3-content-contract.cjs
           node tests/v3-exam-contract.cjs
+          node tests/official-content-contract.cjs
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
