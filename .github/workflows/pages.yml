@@ -1,7 +1,7 @@
 name: Validate and deploy A-Test
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "dev/aus-test-v3-deep-learning"]
   workflow_dispatch:
   pull_request:
     branches: ["main"]
