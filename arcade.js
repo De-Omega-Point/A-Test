@@ -54,20 +54,45 @@
   // A blocked/full localStorage must not break answer feedback in the study app.
   const originalSave = save;
   save = function () { try { originalSave(); } catch { warnStorage(); } };
+  function unlockBadge(id) {
+    if (!badgeIds.has(id) || data.badges.includes(id)) return false;
+    data.badges.push(id);
+    persist();
+    return true;
+  }
   function sound(kind) {
-    if (data.haptics && navigator.vibrate) { try { navigator.vibrate(kind === 'hit' ? [30, 25, 30] : 12); } catch {} }
+    if (data.haptics && navigator.vibrate) {
+      try { navigator.vibrate(kind === 'hit' ? [22, 24, 22] : kind === 'boost' ? [12, 25, 16] : 10); } catch {}
+    }
     if (!data.sound) return;
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       if (!audio) audio = new AC();
       if (audio.state === 'suspended') audio.resume().catch(() => {});
-      const osc = audio.createOscillator(), gain = audio.createGain(), now = audio.currentTime;
-      osc.type = 'sine'; osc.frequency.setValueAtTime(kind === 'hit' ? 140 : kind === 'answer' ? 660 : 880, now);
-      osc.frequency.exponentialRampToValueAtTime(kind === 'hit' ? 70 : 1200, now + .12);
-      gain.gain.setValueAtTime(.045, now); gain.gain.exponentialRampToValueAtTime(.001, now + .15);
-      osc.connect(gain); gain.connect(audio.destination); osc.start(now); osc.stop(now + .16);
-    } catch { /* Audio and vibration are optional. */ }
+      // Original, quietly synthesised arcade cues. Audio is opt-in; no music.
+      const notes = {
+        hit: [[165, 90, .16]], star: [[620, 950, .09]],
+        combo: [[550, 790, .1], [820, 1050, .12]],
+        boost: [[410, 710, .1], [760, 1190, .14]],
+        answer: [[660, 840, .12], [830, 1240, .13]],
+        victory: [[520, 660, .11], [660, 830, .11], [830, 1040, .18]]
+      }[kind] || [[620, 900, .1]];
+      let offset = 0;
+      notes.forEach(([from, to, duration]) => {
+        const now = audio.currentTime + offset;
+        const osc = audio.createOscillator(), gain = audio.createGain();
+        osc.type = kind === 'hit' ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(from, now);
+        osc.frequency.exponentialRampToValueAtTime(to, now + duration);
+        gain.gain.setValueAtTime(.0001, now);
+        gain.gain.linearRampToValueAtTime(.036, now + .018);
+        gain.gain.exponentialRampToValueAtTime(.001, now + duration);
+        osc.connect(gain); gain.connect(audio.destination);
+        osc.start(now); osc.stop(now + duration + .012);
+        offset += duration * .8;
+      });
+    } catch { /* Optional effects must never block the game. */ }
   }
   function focusHeading(root = app) { const h = root.querySelector('[data-focus], h1, h2'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } }
   function stop() {
@@ -151,7 +176,10 @@
   class DashRun {
     constructor(world, kind, seed) {
       Object.assign(this, { world, kind, phase: 'ready', score: 0, stars: 0, shields: 3, streak: 0, maxStreak: 0, lane: 1, x: .5, elapsed: 0, spawnIn: .35, frame: 0, last: 0, checkpoint: 0, correct: 0, picks: 0, target: 1, invulnerable: 0, saved: false, width: 480, height: 520 });
-      this.random = rng(seed ^ 0x5F3759DF); this.deck = chooseQuestions(world, kind, seed); this.objects = []; this.particles = []; this.answers = []; this.events = new AbortController();
+      this.random = rng(seed ^ 0x5F3759DF); this.fxRandom = rng(seed ^ 0xA17C09BA);
+      this.deck = chooseQuestions(world, kind, seed); this.objects = []; this.particles = [];
+      this.trail = []; this.answers = []; this.events = new AbortController();
+      this.spawnCount = 0; this.boosts = 0; this.flash = 0; this.shake = 0; this.newBadges = [];
     }
     mount() {
       document.body.classList.add('dash-active');
@@ -159,6 +187,7 @@
         <div class="dash-hud"><div><small>SCORE</small><strong id="dash-score">0</strong></div><div><small>STARS</small><strong id="dash-stars">✦ 0</strong></div><div><small>${this.kind === 'chill' ? 'PACE' : 'SHIELDS'}</small><strong id="dash-shields">${this.kind === 'chill' ? 'Yours' : '♥ ♥ ♥'}</strong></div><div><small>COMBO</small><strong id="dash-combo">×1</strong></div></div>
         <div class="dash-route"><span id="dash-world-name">${esc(worlds[this.world].name)}</span><span id="dash-progress">Checkpoint 0 / ${this.deck.length}</span></div><div class="dash-meter"><i id="dash-distance"></i></div>
         <div class="dash-playfield"><canvas id="dash-canvas" role="img" aria-label="Three-lane skyway. Collect gold stars and avoid coral bumpers using the lane buttons below."></canvas><div class="dash-float-message" id="dash-message" aria-hidden="true"></div>
+          <div class="dash-boost-banner" id="dash-boost-banner" aria-hidden="true">💎 Civic Boost: +45 points and a shield</div>
           <div class="dash-thumb" aria-label="Steering controls"><div class="dash-steer-hint" id="dash-steer-hint">${this.kind === 'chill' ? 'TAP THE LANE WITH A STAR' : 'SLIDE TO STEER · OR TAP A LANE'}</div><div class="dash-lanes" role="group" aria-label="Choose a lane">${['Left', 'Centre', 'Right'].map((s, i) => `<button data-dash-lane="${i}" aria-pressed="${i === 1}"><span aria-hidden="true">${['←', '●', '→'][i]}</span><small>${s}</small></button>`).join('')}</div></div><div class="dash-overlay" id="dash-overlay"></div>
         </div></section>`;
       this.canvas = document.getElementById('dash-canvas'); this.ctx = this.canvas.getContext('2d'); this.overlay = document.getElementById('dash-overlay');
@@ -182,7 +211,7 @@
         this.onResize = () => this.fit(); window.addEventListener('resize', this.onResize, { signal });
       }
       this.fit();
-      this.show(`<span class="dash-dialog-icon" aria-hidden="true">✦</span><span class="dash-kicker">MEET YOUR LITTLE STAR</span><h2 data-focus>Ready, Sunny?</h2><p>${this.kind === 'chill' ? 'Tap the lane with a star. Collect four to open a learning checkpoint. Take all the time you need.' : 'Slide left and right to collect gold stars. Dodge coral bumpers. Three shields keep you flying.'}</p><div class="dash-mini-legend"><span>✦ Collect</span><span>${this.kind === 'chill' ? '☁ No rush' : '▰ Dodge'}</span><span>♡ Learn</span></div><p class="dash-fine">The game always stops for questions. No rushed reading.</p><button class="dash-button dash-primary" data-dash-action="begin">${this.kind === 'chill' ? 'Start my chill ride' : "Let's fly"} →</button>`);
+      this.show(`<span class="dash-dialog-icon" aria-hidden="true">✦</span><span class="dash-kicker">MEET YOUR LITTLE STAR</span><h2 data-focus>Ready, Sunny?</h2><p>${this.kind === 'chill' ? 'Tap the lane with a star. Collect four to open a learning checkpoint. Take all the time you need.' : 'Slide left and right to collect gold stars. Dodge coral bumpers. Three shields keep you flying. Turquoise Civic Boosts recharge them and give bonus points.'}</p><div class="dash-mini-legend"><span>✦ Collect</span><span>${this.kind === 'chill' ? '☁ No rush' : '▰ Dodge'}</span><span>💎 Boost</span><span>♡ Learn</span></div><p class="dash-fine">The game always stops for questions. No rushed reading.</p><button class="dash-button dash-primary" data-dash-action="begin">${this.kind === 'chill' ? 'Start my chill ride' : "Let's fly"} →</button>`);
     }
     fit() { const b = this.canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2); if (!b.width || !b.height) return; this.canvas.width = Math.round(b.width * dpr); this.canvas.height = Math.round(b.height * dpr); this.width = 480; this.height = b.height / b.width * 480; this.ctx.setTransform(this.canvas.width / this.width, 0, 0, this.canvas.height / this.height, 0, 0); this.draw(); }
     show(html) { this.overlay.hidden = false; this.overlay.innerHTML = `<section class="dash-dialog">${html}</section>`; this.canvas.setAttribute('aria-hidden', 'true'); app.querySelector('.dash-thumb').inert = true; app.querySelector('[data-dash-action="pause"]').disabled = this.phase !== 'paused'; focusHeading(this.overlay); }
