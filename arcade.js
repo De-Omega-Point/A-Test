@@ -255,15 +255,27 @@
     tick(t) { if (this.phase !== 'running') return; const dt = this.last ? Math.min((t - this.last) / 1000, .04) : 0; this.last = t; this.update(dt); this.draw(); if (this.phase === 'running') this.frame = requestAnimationFrame(n => this.tick(n)); }
     update(dt) {
       this.elapsed += dt; this.invulnerable = Math.max(0, this.invulnerable - dt);
+      this.flash = Math.max(0, this.flash - dt); this.shake = Math.max(0, this.shake - dt);
+      for (const p of this.particles) {
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        p.vy += dt * .34; p.life -= dt;
+      }
+      this.particles = this.particles.filter(p => p.life > 0);
+      for (const p of this.trail) p.life -= dt;
+      this.trail = this.trail.filter(p => p.life > 0);
+      if (effectsEnabled() && dt > 0 && this.trail.length < 18) {
+        this.trail.push({ x: this.x, life: .35 });
+      }
       this.x += ([.2, .5, .8][this.lane] - this.x) * Math.min(1, dt * 20);
       if (this.elapsed >= (this.checkpoint + 1) * 10) { this.openCheckpoint(); return; }
       // Distance is the visual heartbeat of the ride. Keep it independent of object spawns.
       this.roadTravel = (this.roadTravel || 0) + dt * 180;
       this.spawnIn -= dt;
       if (this.spawnIn <= 0) {
+        this.spawnCount++;
         this.spawnIn = .8 - this.checkpoint * .06;
         const lane = Math.floor(this.random() * 3), obstacle = (lane + 1 + Math.floor(this.random() * 2)) % 3;
-        this.objects.push({ lane, y: -.08, kind: 'star' });
+        this.objects.push({ lane, y: -.08, kind: this.spawnCount % 9 === 0 ? 'boost' : 'star' });
         if (this.elapsed > 2 && this.random() > .2) this.objects.push({ lane: obstacle, y: -.08, kind: 'bumper' });
       }
       for (const o of this.objects) {
@@ -271,16 +283,97 @@
         if (!o.taken && Math.abs(o.y - .82) < .048 && Math.abs([.2, .5, .8][o.lane] - this.x) < .115) {
           o.taken = true;
           if (o.kind === 'star') this.collect(o.y);
-          else if (!this.invulnerable) { this.shields--; this.streak = 0; this.invulnerable = 1.15; sound('hit'); this.message('Bump! Find an open lane.'); this.hud(); announce(`${this.shields} shields remaining.`); if (!this.shields) { this.finish(false); return; } }
+          else if (o.kind === 'boost') this.collectBoost(o.y);
+          else if (!this.invulnerable) {
+            this.shields--; this.streak = 0; this.invulnerable = 1.15;
+            this.shake = effectsEnabled() ? .20 : 0;
+            sound('hit'); this.message('Bump! Find an open lane.'); this.hud();
+            announce(`${this.shields} shields remaining.`);
+            if (!this.shields) { this.finish(false); return; }
+          }
         }
       }
       this.objects = this.objects.filter(o => !o.taken && o.y < 1.15);
-      this.particles = this.particles.filter(p => (p.life -= dt) > 0);
       document.getElementById('dash-distance').style.width = `${this.elapsed / (this.deck.length * 10) * 100}%`;
     }
-    collect(y) { this.stars++; this.streak++; this.maxStreak = Math.max(this.maxStreak, this.streak); const mult = Math.min(3, 1 + Math.floor(this.streak / 5)); this.score += 10 * mult; sound('star'); if (!reduced.matches) this.particles.push({ x: this.x, y, life: .5 }); this.hud(); }
-    hud() { document.getElementById('dash-score').textContent = this.score.toLocaleString(); document.getElementById('dash-stars').textContent = `✦ ${this.stars}`; document.getElementById('dash-shields').textContent = this.kind === 'chill' ? 'Yours' : '♥ '.repeat(this.shields).trim() || '0'; document.getElementById('dash-combo').textContent = `×${Math.min(3, 1 + Math.floor(this.streak / 5))}`; }
-    message(text) { const el = document.getElementById('dash-message'); el.textContent = text; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+    burst(kind, y = .82) {
+      if (!effectsEnabled() || this.kind === 'chill') return;
+      const n = kind === 'boost' ? 22 : kind === 'combo' ? 18 : 11;
+      const palette = kind === 'boost' ? ['#27b7b4', '#6be6d1', '#a3f7e6', '#f7eac0'] : ['#f2b849', '#fff3a2', '#ef8e67', '#b69af1'];
+      const yy = (.12 + y * .88);
+      for (let i = 0; i < n; i++) {
+        const a = this.fxRandom() * Math.PI * 2;
+        const speed = .15 + this.fxRandom() * .42;
+        this.particles.push({
+          x: this.x, y: yy, vx: Math.cos(a) * speed,
+          vy: Math.sin(a) * speed - .06,
+          life: .36 + this.fxRandom() * .44,
+          maxLife: .8, size: 2 + this.fxRandom() * 4,
+          colour: palette[i % palette.length]
+        });
+      }
+      if (this.particles.length > 100) this.particles.splice(0, this.particles.length - 100);
+    }
+    pulse(id) {
+      if (!effectsEnabled()) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('dash-bop');
+      void el.offsetWidth;
+      el.classList.add('dash-bop');
+    }
+    earnBadge(id) {
+      if (!unlockBadge(id)) return;
+      const item = badgeCatalog.find(b => b.id === id);
+      if (item) {
+        this.newBadges.push(item);
+        announce('Arcade badge unlocked: ' + item.title + '.');
+      }
+    }
+    collect(y) {
+      const previousMultiplier = Math.min(3, 1 + Math.floor(this.streak / 5));
+      this.stars++; this.streak++;
+      this.maxStreak = Math.max(this.maxStreak, this.streak);
+      const multiplier = Math.min(3, 1 + Math.floor(this.streak / 5));
+      this.score += 10 * multiplier;
+      this.burst('star', y);
+      this.pulse('dash-stars');
+      if (multiplier > previousMultiplier) {
+        this.flash = effectsEnabled() ? .18 : 0;
+        this.burst('combo', y);
+        this.message('⚡ COMBO ×' + multiplier + '! Keep the streak!');
+        this.pulse('dash-combo');
+        sound('combo');
+        announce('Combo multiplier now ' + multiplier + ' times.');
+      } else sound('star');
+      if (this.streak >= 5) this.earnBadge('combo-five');
+      this.hud();
+    }
+    collectBoost(y) {
+      this.boosts++; this.score += 45;
+      this.shields = Math.min(3, this.shields + 1);
+      this.flash = effectsEnabled() ? .24 : 0;
+      this.burst('boost', y);
+      this.pulse('dash-shields');
+      sound('boost');
+      this.message('💎 CIVIC BOOST! +45 and a shield');
+      this.earnBadge('civic-boost');
+      this.hud();
+      announce('Civic Boost collected. 45 bonus points. ' + this.shields + ' shields.');
+    }
+    hud() {
+      document.getElementById('dash-score').textContent = this.score.toLocaleString();
+      document.getElementById('dash-stars').textContent = `✦ ${this.stars}`;
+      document.getElementById('dash-shields').textContent = this.kind === 'chill' ? 'Yours' : '♥ '.repeat(this.shields).trim() || '0';
+      document.getElementById('dash-combo').textContent = `×${Math.min(3, 1 + Math.floor(this.streak / 5))}`;
+      const boosts = document.getElementById('dash-boost-banner');
+      if (boosts) boosts.textContent = this.boosts ? `💎 ${this.boosts} Civic Boost${this.boosts === 1 ? '' : 's'} collected` : '💎 Civic Boost: +45 points and a shield';
+    }
+    message(text) {
+      const el = document.getElementById('dash-message');
+      if (!el) return;
+      el.textContent = text; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    }
     openCheckpoint() {
       this.phase = 'question'; cancelAnimationFrame(this.frame); this.objects = []; this.particles = []; this.draw();
       const item = this.deck[this.checkpoint];
