@@ -4,6 +4,7 @@ This is automated accessibility testing, not human VoiceOver/NVDA certification.
 """
 import json
 import os
+import time
 from pathlib import Path
 from contextlib import contextmanager
 from functools import partial
@@ -53,6 +54,26 @@ reader,_=fetch("booklet-reader.js")
 check("Published booklet reader is local",b"/A-Test/assets/our-common-bond-testable.pdf" in reader)
 pdf,content_type=fetch("assets/our-common-bond-testable.pdf",limit=32)
 check("Published source is a valid PDF header",pdf.startswith(b"%PDF-"))
+if os.environ.get("ATEST_VERIFY_LATEST")=="1":
+    api=Request("https://api.github.com/repos/De-Omega-Point/A-Test/commits/main",
+                headers={"Accept":"application/vnd.github+json","User-Agent":"AUS-TEST-verifier"})
+    with urlopen(api,timeout=25) as response:
+        expected=json.load(response)["sha"]
+    print("LATEST MAIN COMMIT",expected,flush=True)
+    for attempt in range(18):
+        try:
+            bytes_,_=fetch("release-build.json")
+            build=json.loads(bytes_)
+            assert build.get("commit")==expected, ("Stale GitHub Pages build",build.get("commit"),expected)
+            check("PUBLIC PAGES SERVES THE EXACT LATEST MAIN COMMIT",True)
+            print("DEPLOYED WORKFLOW RUN",build.get("run_id"),flush=True)
+            break
+        except Exception as error:
+            print("Deploy attestation pending",attempt+1,str(error),flush=True)
+            if attempt==17:
+                raise
+            time.sleep(10)
+
 
 axe_file=Path("node_modules/axe-core/axe.min.js")
 check("axe-core audit library installed",axe_file.is_file())
