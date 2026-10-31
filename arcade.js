@@ -18,6 +18,15 @@
     { part: 'government', name: 'Parliament Peaks', topic: 'Government & the law', icon: '⌂', sky: '#e9e5ff', hill: '#b0a0ed' },
     { part: 'values', name: 'Values Valley', topic: 'Australian Values', icon: '✦', sky: '#dff0ff', hill: '#98c6ef' }
   ];
+  // Arcade rewards recognise play, never substitute for citizenship knowledge.
+  const badgeCatalog = [
+    { id: 'first-flight', icon: '🚀', title: 'First Flight', why: 'Finish your first run' },
+    { id: 'combo-five', icon: '⚡', title: 'Combo Pilot', why: 'Collect five stars in a row' },
+    { id: 'civic-boost', icon: '💎', title: 'Boost Explorer', why: 'Collect a Civic Boost' },
+    { id: 'perfect-run', icon: '🌟', title: 'Bright Thinker', why: 'Answer every checkpoint correctly in a completed run' },
+    { id: 'four-worlds', icon: '🗺️', title: 'World Wanderer', why: 'Explore all four worlds' }
+  ];
+  const badgeIds = new Set(badgeCatalog.map(b => b.id));
   const safeRead = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch { return {}; } };
   const raw = safeRead();
   const num = n => Number.isFinite(Number(n)) ? Math.max(0, Math.floor(Number(n))) : 0;
@@ -27,8 +36,11 @@
     medals: Array.isArray(raw.medals) ? raw.medals.slice(0, 4).map(x => Math.min(3, num(x))) : [],
     credited: Array.isArray(raw.credited) ? raw.credited.filter(x => typeof x === 'string').slice(-1000) : [],
     daily: raw.daily && typeof raw.daily === 'object' ? raw.daily : {},
-    sound: raw.sound === true, haptics: raw.haptics === true
+    sound: raw.sound === true, haptics: raw.haptics === true,
+    effects: raw.effects !== false,
+    badges: Array.isArray(raw.badges) ? [...new Set(raw.badges.filter(id => badgeIds.has(id)))] : []
   };
+  const effectsEnabled = () => data.effects && !reduced.matches;
   let mode = reduced.matches ? 'chill' : 'adventure';
   let active = null, lobbyEvents = null, audio = null, storageWarning = false;
   const esc = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -85,6 +97,10 @@
       <div class="dash-records" aria-label="Arcade records saved on this device">
         <div><strong>${data.best.toLocaleString()}</strong><span>Best adventure</span></div><div><strong>${data.stars.toLocaleString()}</strong><span>Stars collected</span></div><div><strong>${data.cleared.length}<small> / 4</small></strong><span>Worlds explored</span></div>
       </div>
+      <section class="dash-badge-section" aria-label="Civic Dash achievements">
+        <div class="dash-badges-heading"><strong>YOUR ARCADE BADGES</strong><span>${data.badges.length} / ${badgeCatalog.length} unlocked</span></div>
+        <div class="dash-badges">${badgeCatalog.map(b => `<div class="dash-badge ${data.badges.includes(b.id) ? 'unlocked' : 'locked'}" aria-label="${esc(b.title)}. ${esc(b.why)}. ${data.badges.includes(b.id) ? 'Earned' : 'Not yet earned'}"><span class="dash-badge-symbol" aria-hidden="true">${data.badges.includes(b.id) ? b.icon : '◇'}</span><strong>${esc(b.title)}</strong><small>${esc(b.why)}</small></div>`).join('')}</div>
+      </section>
       <div class="dash-section-title"><div><span class="dash-kicker">MAKE IT YOURS</span><h2>Choose your kind of happy.</h2></div><span class="dash-local">Saved on this device</span></div>
       <div class="dash-modes" role="group" aria-label="Game mode">
         ${[['adventure', '↗', 'Adventure', 'Dodge, collect, discover.'], ['chill', '☁', 'Chill ride', 'No hazards or timer.'], ['daily', '✧', 'Daily dash', dailyBest ? `Today's best: ${dailyBest}` : 'Four topics. One fresh course.']].map(([id, icon, title, detail]) => `<button class="dash-mode ${mode === id ? 'selected' : ''}" data-dash-mode="${id}" aria-pressed="${mode === id}"><span aria-hidden="true">${icon}</span><b>${title}</b><small>${detail}</small></button>`).join('')}
@@ -94,7 +110,7 @@
         const locked = mode !== 'chill' && i > target && next >= 0 && !data.cleared.includes(i);
         return `<button class="dash-world world-${i} ${data.cleared.includes(i) ? 'cleared' : ''}" data-dash-start="${i}" ${locked || mode === 'daily' ? 'disabled' : ''} aria-label="${esc(w.name)}. ${esc(w.topic)}. ${locked ? 'Finish the previous world to unlock.' : 'Play.'}"><span class="dash-world-icon" aria-hidden="true">${w.icon}</span><small>WORLD 0${i + 1}</small><h3>${w.name}</h3><p>${w.topic}</p><b>${mode === 'daily' ? 'Included in daily dash' : locked ? '○ Up next' : data.cleared.includes(i) ? `✓ Explored · ${'★'.repeat(data.medals[i] || 1)}` : 'Explore →'}</b></button>`;
       }).join('')}</div>
-      <details class="dash-help"><summary>How to play & comfort settings</summary><div class="dash-help-body"><p><b>Adventure:</b> slide anywhere on the skyway or tap the three lane buttons. Collect gold stars; avoid coral bumpers. Every ten seconds, the action stops for a citizenship question. A correct answer restores a shield. There is no timer on questions.</p><p><b>Chill ride:</b> tap the lane with a star. Four stars open a learning checkpoint. No moving obstacles, lost shields or time limit. Keyboard: arrow keys or A / D to steer; Space or Escape to pause.</p><div class="dash-settings"><button data-dash-setting="sound" aria-pressed="${data.sound}">Sound ${data.sound ? 'on' : 'off'}</button><button data-dash-setting="haptics" aria-pressed="${data.haptics}" ${navigator.vibrate ? '' : 'disabled'}>Vibration ${navigator.vibrate ? data.haptics ? 'on' : 'off' : 'unavailable'}</button></div><p class="dash-fine">Game points are not exam readiness. First-time checkpoint answers contribute practice evidence; repeating the same game question does not add extra evidence. Scores stay on this device. Daily dash resets on your device's local date.</p></div></details>
+      <details class="dash-help"><summary>How to play & comfort settings</summary><div class="dash-help-body"><p><b>Adventure:</b> slide anywhere on the skyway or tap the three lane buttons. Collect gold stars, grab turquoise Civic Boosts for bonus points and a shield, and dodge coral bumpers. Every ten seconds, the action stops for a citizenship question. A correct answer restores a shield. There is no timer on questions.</p><p><b>Chill ride:</b> tap the lane with a star. Four stars open a learning checkpoint. No moving obstacles, lost shields or time limit. Keyboard: arrow keys or A / D to steer; Space or Escape to pause.</p><div class="dash-settings"><button data-dash-setting="sound" aria-pressed="${data.sound}">Sound ${data.sound ? 'on' : 'off'}</button><button data-dash-setting="effects" aria-pressed="${data.effects}">Effects ${data.effects ? 'on' : 'off'}</button><button data-dash-setting="haptics" aria-pressed="${data.haptics}" ${navigator.vibrate ? '' : 'disabled'}>Vibration ${navigator.vibrate ? data.haptics ? 'on' : 'off' : 'unavailable'}</button></div><p class="dash-fine">Visual effects respect your device’s reduced-motion setting. Sound and vibration are off unless you enable them. Game points and badges are not exam readiness. First-time checkpoint answers contribute practice evidence; repeating the same game question does not add extra evidence. Scores stay on this device. Daily dash resets on your device's local date.</p></div></details>
       <div class="dash-links"><span>Prefer a quiet brain workout?</span><button data-view="game">Keyword game →</button><button data-view="map">Capital challenge →</button></div>
     </section>`;
     lobbyEvents = new AbortController();
@@ -104,8 +120,8 @@
       else if (btn.hasAttribute('data-dash-start')) launch(Number(btn.dataset.dashStart));
       else if (btn.hasAttribute('data-dash-setting')) {
         const key = btn.dataset.dashSetting; data[key] = !data[key]; persist();
-        btn.setAttribute('aria-pressed', String(data[key])); btn.textContent = `${key === 'sound' ? 'Sound' : 'Vibration'} ${data[key] ? 'on' : 'off'}`;
-        if (data[key]) sound('star');
+        btn.setAttribute('aria-pressed', String(data[key])); btn.textContent = `${key === 'sound' ? 'Sound' : key === 'effects' ? 'Effects' : 'Vibration'} ${data[key] ? 'on' : 'off'}`;
+        if (data[key] && key !== 'effects') sound('star');
       }
     }, { signal: lobbyEvents.signal });
   }
