@@ -45,7 +45,7 @@ def mount(browser, url, width=390, height=844):
         page.evaluate("Object.defineProperty(window,'localStorage',{value:{values:{},getItem(k){return this.values[k]??null},setItem(k,v){this.values[k]=String(v)}}})")
         for filename in ['styles.css', 'arcade.css', 'study-ui.css']:
             page.add_style_tag(content=(ROOT/filename).read_text())
-        for filename in ['storage.js', 'app.js', 'study-ui.js', 'arcade.js']:
+        for filename in ['storage.js', 'v3-content.js', 'v3-intelligence.js', 'app.js', 'study-ui.js', 'arcade.js']:
             page.add_script_tag(content=(ROOT/filename).read_text())
         page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
     else:
