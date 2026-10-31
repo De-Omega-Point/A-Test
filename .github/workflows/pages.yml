@@ -3,12 +3,14 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  pull_request:
+    branches: ["main"]
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   validate:
@@ -67,6 +69,7 @@ jobs:
       - name: Test the served application in Chromium
         run: python tests/browser-smoke.py
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
     environment:
       name: github-pages
