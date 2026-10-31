@@ -85,6 +85,12 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Test the served application in Chromium
         run: python tests/browser-smoke.py
+      - name: Install automated accessibility audit
+        if: github.event_name == 'pull_request'
+        run: npm install --no-save --ignore-scripts axe-core@4.10.3
+      - name: Check public release and assistive-tech semantics
+        if: github.event_name == 'pull_request'
+        run: python tests/live-release-accessibility.py
       - name: Validation summary
         if: always()
         run: |
