@@ -110,10 +110,10 @@ jobs:
       - name: Check public release and assistive-tech semantics
         if: github.event_name == 'pull_request'
         run: python tests/live-release-accessibility.py
-      - name: Verify latest deployed commit and live WCAG accessibility
+      - name: Verify current public release provenance and proposed-reader WCAG
         if: github.event_name == 'pull_request'
         env:
-          ATEST_AUDIT_TARGET: live
+          ATEST_AUDIT_TARGET: local
           ATEST_VERIFY_LATEST: '1'
         run: python tests/live-release-accessibility.py
       - name: Validation summary
