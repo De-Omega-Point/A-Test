@@ -103,6 +103,19 @@ with site() as url, sync_playwright() as p:
         page.locator('#next').click()
         check('Practice advances', page.evaluate('session.i') == 1)
         # V3 review screen: genuine controls and persisted review record.
+        # Accessible study interactions and post-refresh persistence.
+        page.evaluate("route('domain/federation')")
+        check('Deep learning includes accessible reveal', page.locator('details summary').count() >= 1)
+        page.locator('details summary').first.focus()
+        page.keyboard.press('Enter')
+        check('Keyboard can reveal a learning explanation', page.locator('details[open]').count() >= 1)
+        page.evaluate("route('practice')")
+        check('Revision intelligence is labelled', page.locator('[aria-label="Revision intelligence"]').count() == 1)
+        page.evaluate("state.domains['federation']=2;save()")
+        if not INLINE:
+            page.reload()
+            page.locator('.build-label').wait_for()
+            check('Existing domain progress survives refresh', page.evaluate("state.domains['federation']") >= 2)
         page.evaluate("route('practice')")
         check('V3 adaptive action visible', page.locator('[data-v3-adaptive]').count() == 1)
         check('V3 due-review action visible', page.locator('[data-v3-due]').count() == 1)
