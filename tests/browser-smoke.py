@@ -45,7 +45,7 @@ def mount(browser, url, width=390, height=844):
         page.evaluate("Object.defineProperty(window,'localStorage',{value:{values:{},getItem(k){return this.values[k]??null},setItem(k,v){this.values[k]=String(v)}}})")
         for filename in ['styles.css', 'arcade.css', 'study-ui.css']:
             page.add_style_tag(content=(ROOT/filename).read_text())
-        for filename in ['storage.js', 'v3-content.js', 'v3-intelligence.js', 'lesson-resources.js', 'app.js', 'study-ui.js', 'arcade.js']:
+        for filename in ['storage.js', 'v3-content.js', 'v3-intelligence.js', 'lesson-resources.js', 'booklet-reader.js', 'app.js', 'study-ui.js', 'arcade.js']:
             page.add_script_tag(content=(ROOT/filename).read_text())
         page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
     else:
@@ -79,6 +79,19 @@ with site() as url, sync_playwright() as p:
         check('Flashcard Next changes card', page.locator('.face').inner_text() != first)
         page.locator('[data-prev]').click()
         check('Flashcard Previous returns', page.locator('.face').inner_text() == first)
+        page.evaluate("route('study')")
+        check('Official booklet shortcut displayed', page.locator('[data-booklet-open]').count() >= 1)
+        page.locator('#official-booklet-shortcut [data-booklet-open]').click()
+        check('Official PDF reader renders', page.locator('.booklet-reader iframe').count() == 1)
+        check('Booklet page 7 maps to PDF page 9', '#page=9' in page.locator('.booklet-reader iframe').get_attribute('src'))
+        page.locator('#booklet-page').fill('25')
+        page.locator('[data-booklet-go]').click()
+        check('Reader changes PDF page', '#page=27' in page.locator('.booklet-reader iframe').get_attribute('src'))
+        page.locator('#booklet-notes').fill('Federation revision')
+        page.locator('[data-booklet-notes]').click()
+        check('Reading notes saved separately', page.evaluate("JSON.parse(localStorage.getItem('atest-booklet-reader-v1')).notes") == 'Federation revision')
+        page.locator('[data-booklet-return]').click()
+        check('Reader returns to Study when no remembered lesson', page.locator('.study-parts').count() == 1)
         page.evaluate("route('domain/federation')")
         check('Federation contextual resources visible', page.locator('.lesson-context-resources').count() == 1)
         check('Federation provides official and supplementary links', page.locator('.lesson-resource-links a').count() >= 2)
