@@ -32,3 +32,10 @@ html,body{overflow-x:clip}html{scroll-padding-top:0}.study-resume>.btn{flex:0 0 
 .resource-item h4,.resource-item p{margin:0}
 .resource-item .btn{margin-top:auto;align-self:flex-start}
 .resource-item a:focus-visible{outline:3px solid #6846ae;outline-offset:3px}
+
+/* Contextual links shown beside each deep lesson */
+.lesson-context-resources{margin:16px 0;padding:20px}
+.lesson-resource-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin:14px 0}
+.lesson-resource-links a{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-decoration:none;white-space:normal;min-height:48px}
+.lesson-resource-links small{font-weight:400;opacity:.8}
+.lesson-resource-links a:focus-visible{outline:3px solid #6547ac;outline-offset:3px}
