@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,6 +33,8 @@ jobs:
           node --check v3-intelligence.js
           node --check lesson-resources.js
           node --check booklet-reader.js
+          test -s scripts/build-booklet-pages.py
+          test -s tests/booklet-cross-browser.py
           node --check tests/v3-exam-contract.cjs
           node --check tests/v3-content-contract.cjs
           node --check tests/official-content-contract.cjs
@@ -81,20 +83,37 @@ jobs:
           python-version: '3.12'
       - name: Install browser test tools
         run: |
-          python -m pip install playwright==1.57.0
-          python -m playwright install --with-deps chromium
+          python -m pip install playwright==1.57.0 pymupdf==1.26.7
+          python -m playwright install --with-deps chromium firefox webkit
+      - name: Generate native booklet pages and selectable transcripts
+        run: python scripts/build-booklet-pages.py
+      - name: Verify rendered booklet completeness
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('assets/booklet-pages')
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['pdf_pages']==50
+          assert len(manifest['pages'])==50
+          assert all((root/p['file']).is_file() for p in manifest['pages'])
+          assert (root/'transcripts.json').is_file()
+          print('All 50 pages and transcripts available')
+          PY
       - name: Test the served application in Chromium
         run: python tests/browser-smoke.py
+      - name: Test native booklet scrolling in Chromium Firefox and WebKit
+        run: python tests/booklet-cross-browser.py
       - name: Install automated accessibility audit
         if: github.event_name == 'pull_request'
         run: npm install --no-save --ignore-scripts axe-core@4.10.3
       - name: Check public release and assistive-tech semantics
         if: github.event_name == 'pull_request'
         run: python tests/live-release-accessibility.py
-      - name: Verify latest deployed commit and live WCAG accessibility
+      - name: Verify current public release provenance and proposed-reader WCAG
         if: github.event_name == 'pull_request'
         env:
-          ATEST_AUDIT_TARGET: live
+          ATEST_AUDIT_TARGET: local
           ATEST_VERIFY_LATEST: '1'
         run: python tests/live-release-accessibility.py
       - name: Validation summary
@@ -131,6 +150,14 @@ jobs:
           Path('release-build.json').write_text(json.dumps(result,indent=2)+'\n')
           print('Release attestation:',result)
           PY
+      - name: Set up Python for static page rendering
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF rendering dependency
+        run: python -m pip install pymupdf==1.26.7
+      - name: Generate cross-browser booklet pages
+        run: python scripts/build-booklet-pages.py
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
@@ -166,6 +193,11 @@ jobs:
                   reader=fetch('booklet-reader.js').decode('utf-8')
                   assert '/A-Test/assets/our-common-bond-testable.pdf' in reader
                   assert fetch('assets/our-common-bond-testable.pdf').startswith(b'%PDF-'), 'Published booklet is not a PDF'
+                  pages=json.loads(fetch('assets/booklet-pages/manifest.json'))
+                  assert pages['pdf_pages']==50, 'Expected fifty source pages'
+                  assert pages['pdf_sha256']==attested['booklet_sha256'], 'Rendered pages do not match original PDF'
+                  assert fetch('assets/booklet-pages/page-009.jpg').startswith(bytes([255,216])), 'Source page image was not deployed'
+                  assert fetch('assets/booklet-pages/transcripts.json').startswith(b'{'), 'Text transcripts not deployed'
                   print('LIVE RELEASE VERIFIED',base,'commit',attested['commit'],'workflow run',attested['run_id'],'PDF + reader + syllabus entry')
                   break
               except Exception as error:
