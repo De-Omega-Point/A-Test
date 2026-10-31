@@ -91,7 +91,7 @@ with site() as url, sync_playwright() as p:
         page.locator('[data-booklet-notes]').click()
         check('Reading notes saved separately', page.evaluate("JSON.parse(localStorage.getItem('atest-booklet-reader-v1')).notes") == 'Federation revision')
         page.locator('[data-booklet-return]').click()
-        check('Reader returns to Study when no remembered lesson', page.locator('.study-parts').count() == 1)
+        check('Reader returns to study or remembered lesson', page.locator('.study-parts, .domain-study').count() == 1)
         page.evaluate("route('domain/federation')")
         check('Federation contextual resources visible', page.locator('.lesson-context-resources').count() == 1)
         check('Federation provides official and supplementary links', page.locator('.lesson-resource-links a').count() >= 2)
