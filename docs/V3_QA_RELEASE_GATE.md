@@ -24,3 +24,9 @@
 
 ## Decision gate
 Do NOT merge PR #1 or release the app until the above is verified and the founder explicitly approves the production release.
+
+## Latest acceptance implementation (31 October 2026)
+- Browser smoke suite now exercises V3 adaptive review buttons and incorrect-answer scheduling, checks original `atest-state` persistence, and tests the strict values gate at 19/20 with 4/5 values (fail) and 15/20 with 5/5 (pass).
+- GitHub commit status and pull-request workflow-run lookup for the latest V3 commit returned **no reported runs/statuses**. This is **NOT a pass**. CI setup/visibility must be resolved before a production merge.
+- Source-by-source accuracy and full accessibility verification are still outstanding.
+- Do not equate tests committed to GitHub with tests executed successfully.
