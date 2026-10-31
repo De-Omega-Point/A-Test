@@ -12,7 +12,7 @@ function fixture(initial={},blocked=false){
  Object.defineProperty(window,'localStorage',{get(){if(blocked)throw new Error('Storage denied');return native;}});
  const document={querySelector:s=>s==='#app'?app:node(),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:()=>node(),addEventListener(){},body:node()};
  const context=vm.createContext({console,window,document,localStorage:native,Event:class{},setInterval:()=>1,clearInterval(){}});
- for(const file of ['storage.js','v3-content.js','v3-intelligence.js','app.js','study-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+ for(const file of ['storage.js','v3-content.js','v3-intelligence.js','lesson-resources.js','app.js','study-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
  return{context,app,stored,run:s=>vm.runInContext(s,context)};
 }
 let f=fixture();
@@ -32,6 +32,8 @@ f.run('orderedDomains().forEach(d=>state.domains[d.id]=3);study()');check(!f.app
 check(f.app.innerHTML.includes('Review this part'),'Completed parts remain reviewable');
 f.run('openDomain("first-peoples")');check(f.run('state.domains["first-peoples"]')===3,'Opening a verified domain preserves verification');
 check(f.app.innerHTML.includes('id="domain-evidence"'),'Domain page includes evidence scroll target');
+check(f.app.innerHTML.includes('lesson-context-resources'),'Lesson exposes contextual resource links');
+check(f.app.innerHTML.includes('noopener noreferrer'),'External lesson links use safe navigation');
 f.run('openDomain("invalid")');check(f.app.innerHTML.includes('study-parts'),'Invalid domain recovers to Study');
 f=fixture({'atest-state':JSON.stringify({mocks:{},stats:{people:'bad'},reviews:[],domains:{states:99},domainEvidence:{states:{t:2,c:12}}})});
 check(f.run('Array.isArray(state.mocks)'),'Malformed mock history is repaired in memory');
