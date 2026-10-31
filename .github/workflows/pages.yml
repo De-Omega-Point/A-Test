@@ -104,6 +104,8 @@ jobs:
         run: python tests/browser-smoke.py
       - name: Test native booklet scrolling in Chromium Firefox and WebKit
         run: python tests/booklet-cross-browser.py
+      - name: Verify Civic Dash across Chromium Firefox and WebKit
+        run: python tests/dash-cross-browser.py
       - name: Install automated accessibility audit
         if: github.event_name == 'pull_request'
         run: npm install --no-save --ignore-scripts axe-core@4.10.3
