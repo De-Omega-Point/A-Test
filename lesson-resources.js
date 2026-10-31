@@ -10,7 +10,7 @@ const ATEST_CONTEXT_RESOURCES={
  "laws":[["Watch how a law is made","https://peo.gov.au/understand-our-parliament/how-parliament-works/bills-and-laws/making-a-law","Parliamentary Education Office"]],
  "say":[["Explore voting education","https://education.aec.gov.au/teacher-resources/resources.html","Australian Electoral Commission"]],
  "aec":[["Explore voting education","https://education.aec.gov.au/teacher-resources/resources.html","Australian Electoral Commission"]],
- values-law:[["Official citizenship preparation","https://immi.homeaffairs.gov.au/citizenship/test-and-interview/prepare-for-test","Department of Home Affairs"]],
+ "values-law":[["Official citizenship preparation","https://immi.homeaffairs.gov.au/citizenship/test-and-interview/prepare-for-test","Department of Home Affairs"]],
  "values-freedoms":[["Official citizenship preparation","https://immi.homeaffairs.gov.au/citizenship/test-and-interview/prepare-for-test","Department of Home Affairs"]],
  "values-equality":[["Official citizenship preparation","https://immi.homeaffairs.gov.au/citizenship/test-and-interview/prepare-for-test","Department of Home Affairs"]],
  "mutual-respect":[["Official citizenship preparation","https://immi.homeaffairs.gov.au/citizenship/test-and-interview/prepare-for-test","Department of Home Affairs"]]
