@@ -352,3 +352,6 @@ main{max-width:1320px;margin:auto}.page-head{padding:22px 24px;margin:12px 0 18p
 .audit-summary .stage-card{background:#fff}.audit-table{background:#fff;border-radius:18px;padding:8px}.audit-head,.audit-row{border-bottom-color:#ece7ef}
 .footer{margin-top:32px;border-top-color:#e6e1eb}
 @media(max-width:700px){main{padding-top:12px}.page-head{padding:17px 15px;border-radius:18px}.mastery-heatmap{grid-template-columns:1fr}.card{padding:16px}.evidence-queue,.progress-hero,.study-resume{padding:17px}}
+
+/* WCAG AA: darken small instructional labels on light page surfaces. */
+.page-head .eyebrow, .page-head .panel-title { color:#41317c; }
