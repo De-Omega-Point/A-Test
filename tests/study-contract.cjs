@@ -22,6 +22,9 @@ f.run('cardIndex=0;cards()');check(f.app.innerHTML===first,'Manual Previous retu
 f.run('flipped=true;cards()');check(f.app.innerHTML!==first,'Reveal changes the face');
 f.run('study()');check(f.app.innerHTML.includes('data-view="readings"')&&f.app.innerHTML.includes('data-view="glossary"'),'Study exposes readings and glossary');
 check(f.app.innerHTML.includes('id="part-values"')&&f.app.innerHTML.includes('id="study-library"'),'Study sections have real scroll targets');
+check(f.app.innerHTML.includes('id="study-syllabus"'),'Study syllabus is accessible from Study');
+check((f.app.innerHTML.match(/class="syllabus-item"/g)||[]).length===42,'Syllabus lists all 42 domains');
+check(f.app.innerHTML.includes('Booklet pp')&&f.app.innerHTML.includes('Open lesson'),'Syllabus links learning objectives and source pages');
 f.run('orderedDomains().forEach(d=>state.domains[d.id]=3);study()');check(!f.app.innerHTML.includes('data-domain="undefined"'),'Completed parts never generate invalid links');
 check(f.app.innerHTML.includes('Review this part'),'Completed parts remain reviewable');
 f.run('openDomain("first-peoples")');check(f.run('state.domains["first-peoples"]')===3,'Opening a verified domain preserves verification');
