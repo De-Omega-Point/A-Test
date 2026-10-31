@@ -1,0 +1,48 @@
+name: Import official Our Common Bond PDF
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-booklet.yml
+permissions:
+  contents: write
+jobs:
+  import-booklet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Download official Home Affairs source
+        run: |
+          mkdir -p assets
+          curl --fail --location --retry 3 --retry-all-errors --max-time 180 \
+            --user-agent "AUS-TEST educational resource downloader" \
+            "https://immi.homeaffairs.gov.au/citizenship-subsite/files/our-common-bond-testable.pdf" \
+            --output assets/our-common-bond-testable.pdf
+      - name: Validate downloaded PDF and provenance
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('assets/our-common-bond-testable.pdf')
+          data=p.read_bytes()
+          assert data.startswith(b'%PDF-'), 'Source is not a PDF'
+          assert 10_000_000 < len(data) < 25_000_000, 'Unexpected PDF size'
+          assert b'%%EOF' in data[-4096:], 'PDF appears truncated'
+          print('Official PDF verified:', len(data), 'bytes')
+          PY
+          sha256sum assets/our-common-bond-testable.pdf
+      - name: Commit original PDF without altering content
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/our-common-bond-testable.pdf
+          if git diff --cached --quiet; then
+            echo "Booklet already matches the downloaded official version"
+          else
+            git commit -m "docs: host original Our Common Bond testable booklet locally"
+            git push origin HEAD:main
+          fi
