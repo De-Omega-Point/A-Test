@@ -6,7 +6,7 @@ const source=fs.readFileSync(path.join(root,'v3-content.js'),'utf8');
 const context=vm.createContext({});
 vm.runInContext(source,context);
 const call=id=>vm.runInContext('v3DomainPanel('+JSON.stringify(id)+')',context);
-const curriculum=vm.runInNewContext(fs.readFileSync(path.join(root,'app.js'),'utf8').match(/const curriculumV2=([\\s\\S]*?);\\n/)[1]);
+const curriculum=vm.runInNewContext(fs.readFileSync(path.join(root,'app.js'),'utf8').split('const curriculumV2=')[1].split('];')[0]+']');
 const required=curriculum.flatMap(part=>part.domains.map(domain=>domain[0]));
 assert.equal(required.length,42,'All 42 source-ordered curriculum domains are present');
 for(const id of required){
