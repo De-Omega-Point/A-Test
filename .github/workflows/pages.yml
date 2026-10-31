@@ -100,3 +100,22 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify public release marker
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python - <<'PY'
+          import os, json, urllib.request, time
+          url=os.environ['PAGE_URL'].rstrip('/')+'/release-status.json'
+          for attempt in range(12):
+              try:
+                  with urllib.request.urlopen(url+'?check='+str(attempt),timeout=12) as response:
+                      payload=json.load(response)
+                  assert payload.get('release')=='2026-10-31-v3-syllabus', payload
+                  print('Verified public release marker at',url)
+                  break
+              except Exception as exc:
+                  print('Public verification attempt',attempt+1,'failed:',exc)
+                  if attempt==11: raise
+                  time.sleep(10)
+          PY
