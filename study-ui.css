@@ -39,3 +39,17 @@ html,body{overflow-x:clip}html{scroll-padding-top:0}.study-resume>.btn{flex:0 0 
 .lesson-resource-links a{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-decoration:none;white-space:normal;min-height:48px}
 .lesson-resource-links small{font-weight:400;opacity:.8}
 .lesson-resource-links a:focus-visible{outline:3px solid #6547ac;outline-offset:3px}
+
+/* Official booklet companion reader */
+.booklet-reader{max-width:1100px;margin:16px auto;padding:20px}
+.booklet-reader iframe{display:block;width:100%;height:min(74vh,850px);min-height:440px;border:1px solid #d4cce0;border-radius:12px;background:#f7f5fa}
+.booklet-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:16px 0}
+.booklet-controls label{display:grid;gap:5px;min-width:135px}
+.booklet-controls input,.booklet-controls select{padding:10px;border-radius:8px;border:1px solid #aca5b8}
+.booklet-fallback{margin:12px 0}
+.booklet-checklist{display:grid;gap:10px;margin:12px 0 22px}
+.booklet-section{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #ddd5e5;border-radius:9px;padding:11px}
+.booklet-section label{display:flex;align-items:center;gap:8px}
+.booklet-reader textarea{width:100%;min-height:100px;padding:12px;border:1px solid #b9b1c7;border-radius:10px}
+.booklet-reader button:focus-visible,.booklet-reader a:focus-visible{outline:3px solid #6547ac;outline-offset:3px}
+@media(max-width:560px){.booklet-reader{padding:12px}.booklet-reader iframe{min-height:420px;height:60vh}.booklet-section{flex-wrap:wrap}.booklet-controls>*{flex:1 1 150px}}
