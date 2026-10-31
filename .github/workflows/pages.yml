@@ -107,6 +107,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Stamp exact production build provenance
+        run: |
+          python - <<'PY'
+          import json, os, hashlib
+          from datetime import datetime, timezone
+          from pathlib import Path
+          booklet=Path('assets/our-common-bond-testable.pdf')
+          result={
+              'product':'AUS-TEST V3',
+              'commit':os.environ['GITHUB_SHA'],
+              'run_id':os.environ['GITHUB_RUN_ID'],
+              'run_attempt':os.environ.get('GITHUB_RUN_ATTEMPT','1'),
+              'built_utc':datetime.now(timezone.utc).isoformat(),
+              'booklet_sha256':hashlib.sha256(booklet.read_bytes()).hexdigest()
+          }
+          Path('release-build.json').write_text(json.dumps(result,indent=2)+'\n')
+          print('Release attestation:',result)
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
@@ -137,10 +155,12 @@ jobs:
                   assert marker.get('syllabusTopics')==42, marker
                   html=fetch('index.html').decode('utf-8')
                   assert 'booklet-reader.js' in html and 'study-ui.js' in html
+                  attested=json.loads(fetch('release-build.json'))
+                  assert attested['commit']==os.environ['GITHUB_SHA'], ('Published commit is stale',attested['commit'],os.environ['GITHUB_SHA'])
                   reader=fetch('booklet-reader.js').decode('utf-8')
                   assert '/A-Test/assets/our-common-bond-testable.pdf' in reader
                   assert fetch('assets/our-common-bond-testable.pdf').startswith(b'%PDF-'), 'Published booklet is not a PDF'
-                  print('LIVE RELEASE VERIFIED',base,'PDF + reader + syllabus entry')
+                  print('LIVE RELEASE VERIFIED',base,'commit',attested['commit'],'workflow run',attested['run_id'],'PDF + reader + syllabus entry')
                   break
               except Exception as error:
                   print('Attempt',attempt+1,'not ready:',error,flush=True)
