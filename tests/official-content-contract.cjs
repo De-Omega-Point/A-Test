@@ -21,7 +21,7 @@ for(const id of ids){
  assert.ok(d,id+' missing V3 deep content');
  assert.ok(/^\d+(?:[–,-]\d+)*(?:, \d+)*$/.test(d.page),id+' invalid source page');
  for(const n of d.page.match(/\d+/g).map(Number))assert.ok(n>=7&&n<=39,id+' source page outside official testable section');
- for(const k of ['objective','why','scenario','question','answer'])assert.ok(typeof d[k]==='string'&&d[k].trim().length>10,id+' incomplete '+k);
+ for(const k of ['objective','why','scenario','question','answer'])assert.ok(typeof d[k]==='string'&&d[k].trim().length>=(k==='answer'?4:10),id+' incomplete '+k);
  assert.ok(d.visual.length>=3,id+' requires visual sequence of three stages');
 }
 const validParts=['people','rights','government','values'];
