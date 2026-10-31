@@ -41,6 +41,7 @@ def verify(browser_type,base,width,height):
     page.on("pageerror",lambda error:errors.append(str(error)))
     response=page.goto(base+"#study",wait_until="domcontentloaded",timeout=30000)
     assert response and response.ok, "Study route must load"
+    page.evaluate("state.domains.federation=3;state.mocks=[{score:16,values:5,pass:true,date:Date.now()}];save()")
     page.locator("#official-booklet-shortcut [data-booklet-open]").click()
     page.locator(".booklet-pages").wait_for()
     assert page.locator(".booklet-reader iframe").count()==0, "No embedded PDF plugin should remain"
@@ -79,7 +80,8 @@ def verify(browser_type,base,width,height):
 
     page.locator("#booklet-notes").fill("Native reader review")
     assert page.evaluate("JSON.parse(localStorage.getItem('atest-booklet-reader-v1')).notes")=="Native reader review"
-    assert page.evaluate("!!localStorage.getItem('atest-state')"),"Keep pre-existing learner progress"
+    assert page.evaluate("JSON.parse(localStorage.getItem('atest-state')).domains.federation") == 3,"Keep existing lesson mastery"
+    assert page.evaluate("JSON.parse(localStorage.getItem('atest-state')).mocks.length") == 1,"Keep existing mock history"
 
     # Navigate away and return: the last page/notes must survive.
     page.locator('[data-view="study"]').last.click()
