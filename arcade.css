@@ -65,3 +65,30 @@ body.dash-active{overflow:hidden;background:#f2eafb}.dash-active .topbar,.dash-a
 .dash-confetti i:nth-child(10){left:74.8%;--dx:44px;animation-delay:252ms}
 .dash-confetti i:nth-child(11){left:82%;--dx:55px;animation-delay:280ms}
 .dash-confetti i:nth-child(12){left:89.2%;--dx:66px;animation-delay:308ms}
+
+
+/* Release accessibility gate: WCAG AA contrast for small arcade metadata. */
+.dash-lobby .dash-micro,
+.dash-lobby .dash-records span,
+.dash-lobby .dash-records strong small,
+.dash-lobby .dash-mode small,
+.dash-lobby .dash-local,
+.dash-lobby .dash-badge small,
+.dash-lobby .dash-world small,
+.dash-lobby .dash-world p,
+.dash-game .dash-toolbar b small,
+.dash-game .dash-hud small,
+.dash-game .dash-route,
+.dash-game .dash-steer-hint,
+.dash-game .dash-lanes button small,
+.dash-dialog .dash-fine,
+.dash-dialog .dash-mini-legend,
+.dash-dialog > p{color:#4b3a58}
+.dash-game #dash-shields{color:#983b42}
+.dash-game #dash-combo{color:#563688}
+.dash-game .dash-lanes button{color:#503865}
+.dash-lobby .dash-kicker{color:#513475}
+.dash-badge.locked{opacity:1;filter:none;background:#f5f1f7;border-color:#e4dce9}
+.dash-badge.locked .dash-badge-symbol{color:#514467}
+.dash-badge.locked strong{color:#483456}
+.dash-badge.locked small{color:#51445f}
