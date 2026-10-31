@@ -41,7 +41,6 @@ def verify(browser_type,base,width,height):
     page.on("pageerror",lambda error:errors.append(str(error)))
     response=page.goto(base+"#study",wait_until="domcontentloaded",timeout=30000)
     assert response and response.ok, "Study route must load"
-    page.evaluate("state.domains.federation=3;state.mocks=[{score:16,values:5,pass:true,date:Date.now()}];save()")
     page.locator("#official-booklet-shortcut [data-booklet-open]").click()
     page.locator(".booklet-pages").wait_for()
     assert page.locator(".booklet-reader iframe").count()==0, "No embedded PDF plugin should remain"
