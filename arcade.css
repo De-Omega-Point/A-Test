@@ -92,3 +92,6 @@ body.dash-active{overflow:hidden;background:#f2eafb}.dash-active .topbar,.dash-a
 .dash-badge.locked .dash-badge-symbol{color:#514467}
 .dash-badge.locked strong{color:#483456}
 .dash-badge.locked small{color:#51445f}
+
+/* Ensure the arcade's learning alternatives stay readable at small sizes. */
+.dash-lobby .dash-links > span{color:#453754}
