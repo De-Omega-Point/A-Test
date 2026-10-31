@@ -67,7 +67,7 @@ with site() as url, sync_playwright() as p:
             check(f'{view}: no mobile overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
         page.evaluate("route('study')")
         page.locator('[data-section="study-library"]').click()
-        page.wait_for_timeout(1200)
+        page.wait_for_function("() => { const el=document.querySelector('#study-library'); return el && el.getBoundingClientRect().top < 180 && el.getBoundingClientRect().bottom > 0; }", timeout=12000)
         check('Section jump preserves Study', page.locator('.study-parts').count() == 1)
         check('Section jump reaches library', page.locator('#study-library').bounding_box()['y'] < 180)
         check('In-page menu remains sticky', 0 <= page.locator('.onpage-nav').bounding_box()['y'] < 100)
