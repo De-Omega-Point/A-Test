@@ -112,22 +112,32 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify public release marker
+      - name: Verify live application and local booklet
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           python - <<'PY'
-          import os, json, urllib.request, time
-          url=os.environ['PAGE_URL'].rstrip('/')+'/release-status.json'
+          import json, os, time, urllib.request
+          base=os.environ['PAGE_URL'].rstrip('/')
+          def fetch(path):
+              req=urllib.request.Request(base+'/'+path,headers={'User-Agent':'AUS-TEST release-check'})
+              with urllib.request.urlopen(req,timeout=20) as response:
+                  if path.endswith('.pdf'):
+                      return response.read(8)
+                  return response.read(250_000)
           for attempt in range(12):
               try:
-                  with urllib.request.urlopen(url+'?check='+str(attempt),timeout=12) as response:
-                      payload=json.load(response)
-                  assert payload.get('release')=='2026-10-31-v3-syllabus', payload
-                  print('Verified public release marker at',url)
+                  marker=json.loads(fetch('release-status.json'))
+                  assert marker.get('syllabusTopics')==42, marker
+                  html=fetch('index.html').decode('utf-8')
+                  assert 'booklet-reader.js' in html and 'study-ui.js' in html
+                  reader=fetch('booklet-reader.js').decode('utf-8')
+                  assert '/A-Test/assets/our-common-bond-testable.pdf' in reader
+                  assert fetch('assets/our-common-bond-testable.pdf').startswith(b'%PDF-'), 'Published booklet is not a PDF'
+                  print('LIVE RELEASE VERIFIED',base,'PDF + reader + syllabus entry')
                   break
-              except Exception as exc:
-                  print('Public verification attempt',attempt+1,'failed:',exc)
+              except Exception as error:
+                  print('Attempt',attempt+1,'not ready:',error,flush=True)
                   if attempt==11: raise
                   time.sleep(10)
           PY
