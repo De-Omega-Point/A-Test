@@ -6,7 +6,9 @@ const source=fs.readFileSync(path.join(root,'v3-content.js'),'utf8');
 const context=vm.createContext({});
 vm.runInContext(source,context);
 const call=id=>vm.runInContext('v3DomainPanel('+JSON.stringify(id)+')',context);
-const required=['first-peoples','settlement','federation','powers','levels','rule-law','speech','religion','fair-go','respect','community'];
+const curriculum=vm.runInNewContext(fs.readFileSync(path.join(root,'app.js'),'utf8').match(/const curriculumV2=([\\s\\S]*?);\\n/)[1]);
+const required=curriculum.flatMap(part=>part.domains.map(domain=>domain[0]));
+assert.equal(required.length,42,'All 42 source-ordered curriculum domains are present');
 for(const id of required){
   const html=call(id);
   assert.match(html,/Learning objective/);
@@ -17,6 +19,7 @@ for(const id of required){
 }
 assert.equal(call('unknown'),'','Missing lessons degrade gracefully');
 assert.ok(!call('federation').includes('<script'),'No executable HTML in content');
+assert.ok(required.every(id=>call(id).length>150),'Every curriculum lesson has a substantive deep-learning panel');
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(app.includes("v3DomainPanel(id)"),'Study flow renders V3 lesson panel');
