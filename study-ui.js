@@ -56,8 +56,29 @@
     const e = domainEnrichment[id] || ['', '', '', d.cue], ev = state.domainEvidence[id] || {c:0,t:0}, all = orderedDomains(), i = all.findIndex(x => x.id === id);
     write('atest-last-domain', id); state.domains[id] = Math.max(1, state.domains[id] || 0); save();
     app.innerHTML = `<div class="study-breadcrumb"><button data-view="study">← All study parts</button><span>Domain ${i+1} / ${all.length}</span></div>` + pageHead('STUDY', d.title, 'Learn the idea. Test your recall. Keep your place.') +
-      `<article class="card domain-study"><div class="eyebrow">${topicInfo[d.part].name}</div>${[['learn','Learn',d.teach],['example','Example',e[1]],['trap','Common trap',e[2]],['recall','Recall hook',e[3]]].map(([key,label,text],n) => `<section class="study-step ${key}" id="domain-${key}"><span>${n+1}</span><div><h3>${label}</h3><p>${text}</p></div></section>`).join('')}${v3DomainPanel(id)}<section class="evidence" id="domain-evidence"><h3>Your evidence</h3><b>${ev.c} correct / ${ev.t} attempts</b><small>Verification requires 3+ attempts, 2+ correct and at least 75% accuracy.</small><div class="actions"><button class="primary" data-domain-master="${id}">${state.domains[id]>=3?'✓ Verified':state.domains[id]>=2?'◆ Understood':'◆ I understand this'}</button><button data-topic="${d.part}">Test this part</button></div></section></article><div class="study-nav">${i>0?`<button class="btn" data-domain="${all[i-1].id}">← ${all[i-1].label}</button>`:'<button class="btn" data-view="study">Back to Study</button>'}${i+1<all.length?`<button class="btn primary" data-domain="${all[i+1].id}">${all[i+1].label} →</button>`:'<button class="btn primary" data-view="practice">Go to Practise →</button>'}</div>`;
+      `<article class="card domain-study"><div class="eyebrow">${topicInfo[d.part].name}</div>${[['learn','Learn',d.teach],['example','Example',e[1]],['trap','Common trap',e[2]],['recall','Recall hook',e[3]]].map(([key,label,text],n) => `<section class="study-step ${key}" id="domain-${key}"><span>${n+1}</span><div><h3>${label}</h3><p>${text}</p></div></section>`).join('')}${v3DomainPanel(id)}<section class="evidence" id="domain-evidence"><h3>Your evidence</h3><b>${ev.c} correct / ${ev.t} attempts</b><small>Verification requires 3+ attempts, 2+ correct and at least 75% accuracy.</small><div class="actions"><button class="primary" data-domain-master="${id}">${state.domains[id]>=3?'✓ Verified':state.domains[id]>=2?'◆ Understood':'◆ I understand this'}</button><button data-topic="${d.part}">Test this part</button><button type="button" class="btn" data-reset-lesson="${id}" aria-label="Reset progress for ${escape(d.title)}">↻ Reset lesson</button></div><div class="lesson-reset-confirm" id="lesson-reset-confirm" hidden role="group" aria-label="Confirm lesson reset"><p>Reset only this lesson’s progress and evidence? Your other lessons, practice history and mock results will stay.</p><div class="actions"><button type="button" data-reset-confirm="${id}">Yes, reset this lesson</button><button type="button" data-reset-cancel>Cancel</button></div></div></section></article><div class="study-nav">${i>0?`<button class="btn" data-domain="${all[i-1].id}">← ${all[i-1].label}</button>`:'<button class="btn" data-view="study">Back to Study</button>'}${i+1<all.length?`<button class="btn primary" data-domain="${all[i+1].id}">${all[i+1].label} →</button>`:'<button class="btn primary" data-view="practice">Go to Practise →</button>'}</div>`;
   };
+  // Reset affects only domain mastery and evidence; all history elsewhere is retained.
+  document.addEventListener('click', event => {
+    const reset=event.target.closest('[data-reset-lesson]');
+    const cancel=event.target.closest('[data-reset-cancel]');
+    const confirm=event.target.closest('[data-reset-confirm]');
+    if(!reset&&!cancel&&!confirm)return;
+    event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+    const panel=document.getElementById('lesson-reset-confirm');
+    if(reset){if(panel){panel.hidden=false;panel.querySelector('[data-reset-cancel]')?.focus();}return;}
+    if(cancel){if(panel)panel.hidden=true;resetLessonFocus();return;}
+    const id=confirm.dataset.resetConfirm;
+    if(!domainKnowledge[id])return;
+    delete state.domains[id];
+    delete state.domainEvidence[id];
+    save();
+    // Return to the syllabus, where this lesson now reads Not started.
+    study();
+    const announcement=document.getElementById('app-status');
+    if(announcement)announcement.textContent=domainKnowledge[id].title+' lesson progress reset. Other progress preserved.';
+  },true);
+  function resetLessonFocus(){document.querySelector('[data-reset-lesson]')?.focus();}
   studyResume = () => openDomain(resumeDomain().id);
   // Manual Previous/Next must not be overwritten by the due-card queue.
   function firstDueCard() { const due = flashcards.map((_,i) => ({i,d:state.reviews[i]||0})).filter(x => x.d<=Date.now()).sort((a,b)=>a.d-b.d); cardIndex = due[0]?.i ?? 0; flipped=false; }
