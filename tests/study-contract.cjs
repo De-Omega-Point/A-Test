@@ -23,6 +23,9 @@ f.run('flipped=true;cards()');check(f.app.innerHTML!==first,'Reveal changes the 
 f.run('study()');check(f.app.innerHTML.includes('data-view="readings"')&&f.app.innerHTML.includes('data-view="glossary"'),'Study exposes readings and glossary');
 check(f.app.innerHTML.includes('id="part-values"')&&f.app.innerHTML.includes('id="study-library"'),'Study sections have real scroll targets');
 check(f.app.innerHTML.includes('id="study-syllabus"'),'Study syllabus is accessible from Study');
+check(f.app.innerHTML.includes('id="study-resources"'),'Study has external resource library');
+check((f.app.innerHTML.match(/class=\\"resource-item\\"/g)||[]).length===6,'Six verified resource cards appear');
+check(f.app.innerHTML.includes('rel=\\"noopener noreferrer\\"'),'External resources open with safe link attributes');
 check((f.app.innerHTML.match(/class="syllabus-item"/g)||[]).length===42,'Syllabus lists all 42 domains');
 check(f.app.innerHTML.includes('Booklet pp')&&f.app.innerHTML.includes('Open lesson'),'Syllabus links learning objectives and source pages');
 f.run('orderedDomains().forEach(d=>state.domains[d.id]=3);study()');check(!f.app.innerHTML.includes('data-domain="undefined"'),'Completed parts never generate invalid links');
