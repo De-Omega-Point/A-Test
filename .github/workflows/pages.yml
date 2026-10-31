@@ -36,7 +36,7 @@ jobs:
           node --check tests/v3-content-contract.cjs
           node --check tests/official-content-contract.cjs
       - name: Required files
-        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs
+        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs && test -s lesson-resources.js
       - name: Product contract
         run: |
           grep -q 'data-view="home"' index.html
