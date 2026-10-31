@@ -56,3 +56,21 @@ html,body{overflow-x:clip}html{scroll-padding-top:0}.study-resume>.btn{flex:0 0 
 
 /* WCAG AA: version/build label must remain readable at small sizes. */
 .build-label { color:#34415c; opacity:1; font-size:12px; font-weight:600; }
+
+
+/* Cross-browser, frame-free booklet reading. Scrolling belongs to the page, not
+   to a browser-specific embedded PDF plugin. */
+.booklet-reader{overflow:visible;min-width:0}
+.booklet-reader-toolbar{position:sticky;top:76px;z-index:12;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px;margin:12px 0;background:#fffdf8;border:1px solid #ddd4e6;border-radius:12px}
+.booklet-reader-toolbar strong{font-size:.95rem;color:#283a59;line-height:1.5}
+.booklet-pages{display:flex;flex-direction:column;align-items:center;gap:22px;overflow:visible;height:auto;max-height:none;overscroll-behavior:auto}
+.booklet-page{scroll-margin-top:155px;display:block;width:min(100%,1012px);margin:0;padding:0 0 15px;max-width:100%;overflow:visible;border:1px solid #d9d0e3;border-radius:12px;background:#fff;box-shadow:0 4px 18px #36445c12}
+.booklet-page figcaption{padding:12px 16px;font-weight:750;color:#34415b;background:#f7f5fb;border-bottom:1px solid #e9e2ed}
+.booklet-page>a{display:block;line-height:0;max-width:100%;cursor:zoom-in}
+.booklet-page img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;background:#fff;aspect-ratio:1012 / 1432}
+.booklet-page details{padding:12px 16px;border-top:1px solid #e7e0eb;line-height:1.5}
+.booklet-page summary{cursor:pointer;color:#392a74;font-weight:650;padding:8px 0}
+.booklet-transcript{color:#253047;font-size:1rem;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;margin-top:10px;max-width:75ch}
+.booklet-page a:focus-visible,.booklet-page summary:focus-visible{outline:3px solid #6547ac;outline-offset:3px}
+@media(max-width:700px){.booklet-reader-toolbar{top:67px;padding:10px}.booklet-reader-toolbar button{min-height:44px}.booklet-page{scroll-margin-top:132px}.booklet-pages{gap:16px}}
+@media(max-width:430px){.booklet-reader-toolbar strong{width:100%;order:-1;text-align:center}.booklet-reader-toolbar button{flex:1 1 135px}.booklet-page figcaption{padding:10px 12px}}
