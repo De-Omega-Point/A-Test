@@ -221,6 +221,15 @@
       if (b.hasAttribute('data-dash-lane')) { if (this.phase === 'running') this.steer(Number(b.dataset.dashLane)); return; }
       if (b.hasAttribute('data-dash-choice')) { this.answer(Number(b.dataset.dashChoice)); return; }
       switch (b.dataset.dashAction) {
+        case 'toggle-effects':
+        case 'toggle-sound': {
+          const setting = b.dataset.dashAction === 'toggle-effects' ? 'effects' : 'sound';
+          data[setting] = !data[setting]; persist();
+          b.setAttribute('aria-pressed', String(data[setting]));
+          b.textContent = (setting === 'effects' ? 'Visual effects' : 'Sound') + (data[setting] ? ' on' : ' off');
+          if (setting === 'sound' && data.sound) sound('star');
+          break;
+        }
         case 'begin': this.phase = 'running'; this.hide(); if (this.kind === 'chill') this.chillStar(); else this.startLoop(); this.focusControls(); break;
         case 'pause': if (this.phase === 'paused') this.resume(); else this.pause(); break;
         case 'resume': this.resume(); break;
@@ -389,7 +398,8 @@
       this.answers.push({ q: item.q, ok }); creditAnswer(item.q, ok);
       if (ok) { this.correct++; this.score += 120; this.shields = Math.min(3, this.shields + 1); sound('answer'); } else this.streak = 0;
       this.hud();
-      this.show(`<span class="dash-dialog-icon ${ok ? '' : 'dash-warm'}" aria-hidden="true">${ok ? '✦' : '♡'}</span><span class="dash-kicker">${ok ? '+120 POINTS' + (this.kind === 'chill' ? '' : ' · SHIELD RESTORED') : 'A LITTLE LEARNING MOMENT'}</span><h2 data-focus>${ok ? 'That’s the idea!' : 'Now you know.'}</h2>${ok ? '' : `<p class="dash-fine">You chose: ${esc(option.text)}</p>`}<div class="dash-explanation"><strong>${esc(item.q[2][item.q[3]])}</strong><p>${esc(item.q[4])}</p></div><p class="dash-fine">${ok ? 'Keep that one in your pocket.' : 'No shield lost. Learning is part of the adventure.'}</p><button class="dash-button dash-primary" data-dash-action="next">${this.checkpoint + 1 === this.deck.length ? 'See my results' : 'Back to the skyway'} →</button>`);
+      const confetti = ok && effectsEnabled() ? '<div class="dash-confetti" aria-hidden="true">' + Array.from({length: 12}, (_, i) => '<i style="--i:' + i + '"></i>').join('') + '</div>' : '';
+      this.show(`${confetti}<span class="dash-dialog-icon ${ok ? '' : 'dash-warm'}" aria-hidden="true">${ok ? '✦' : '♡'}</span><span class="dash-kicker">${ok ? '+120 POINTS' + (this.kind === 'chill' ? '' : ' · SHIELD RESTORED') : 'A LITTLE LEARNING MOMENT'}</span><h2 data-focus>${ok ? 'That’s the idea!' : 'Now you know.'}</h2>${ok ? '' : `<p class="dash-fine">You chose: ${esc(option.text)}</p>`}<div class="dash-explanation"><strong>${esc(item.q[2][item.q[3]])}</strong><p>${esc(item.q[4])}</p></div><p class="dash-fine">${ok ? 'Keep that one in your pocket.' : 'No shield lost. Learning is part of the adventure.'}</p><button class="dash-button dash-primary" data-dash-action="next">${this.checkpoint + 1 === this.deck.length ? 'See my results' : 'Back to the skyway'} →</button>`);
     }
     continue() {
       if (this.phase !== 'feedback') return;
@@ -404,12 +414,14 @@
     pause(message = 'Take a breath. Your skyway will be right here.') {
       if (this.phase !== 'running' && this.phase !== 'paused') return;
       this.phase = 'paused'; cancelAnimationFrame(this.frame);
-      this.show(`<span class="dash-dialog-icon" aria-hidden="true">☁</span><h2 data-focus>Cloud break.</h2><p>${esc(message)}</p><button class="dash-button dash-primary" data-dash-action="resume">Keep flying →</button><button class="dash-button dash-secondary" data-dash-action="leave">End run & return to arcade</button>`);
+      this.show(`<span class="dash-dialog-icon" aria-hidden="true">☁</span><h2 data-focus>Cloud break.</h2><p>${esc(message)}</p><div class="dash-pause-settings" role="group" aria-label="Comfort settings"><button data-dash-action="toggle-effects" aria-pressed="${data.effects}">Visual effects ${data.effects ? 'on' : 'off'}</button><button data-dash-action="toggle-sound" aria-pressed="${data.sound}">Sound ${data.sound ? 'on' : 'off'}</button></div><button class="dash-button dash-primary" data-dash-action="resume">Keep flying →</button><button class="dash-button dash-secondary" data-dash-action="leave">End run & return to arcade</button>`);
     }
     resume() { if (this.phase !== 'paused') return; this.hide(); this.phase = 'running'; if (this.kind === 'chill') this.chillStar(); else this.startLoop(); this.focusControls(); }
     finish(success) {
       if (this.saved) return;
       this.saved = true; this.phase = 'result'; cancelAnimationFrame(this.frame);
+      this.earnBadge('first-flight');
+      if (success && this.deck.length && this.correct === this.deck.length) this.earnBadge('perfect-run');
       const medal = !success ? 0 : this.correct === this.deck.length ? 3 : this.correct >= 2 ? 2 : 1;
       const freshBest = this.kind === 'adventure' && this.score > data.best;
       data.runs++; data.stars += this.stars;
@@ -417,8 +429,12 @@
       if (this.kind === 'daily') data.daily = { date: dayKey(), best: Math.max(data.daily.date === dayKey() ? num(data.daily.best) : 0, this.score) };
       else if (success) { if (!data.cleared.includes(this.world)) data.cleared.push(this.world); data.medals[this.world] = Math.max(data.medals[this.world] || 0, medal); }
       persist();
+      if (data.cleared.length === 4) this.earnBadge('four-worlds');
+      if (success) sound('victory');
+      const badgeAward = this.newBadges.length ? '<section class="dash-new-badges" aria-label="New arcade achievements"><strong>🏅 New badge' + (this.newBadges.length === 1 ? '' : 's') + ' unlocked!</strong>' +
+        this.newBadges.map(b => '<span>' + b.icon + ' ' + esc(b.title) + '</span>').join('') + '</section>' : '';
       const misses = this.answers.filter(x => !x.ok), review = misses.map(x => questionDomainMap[x.q[1]]).find(Boolean);
-      this.show(`<span class="dash-result-stars" aria-label="${medal} of 3 exploration stars">${success ? '★'.repeat(medal) + '☆'.repeat(3 - medal) : '♡'}</span><span class="dash-kicker">${freshBest ? 'NEW ADVENTURE BEST!' : success ? 'JOURNEY COMPLETE' : 'EVERY RUN IS A FRESH START'}</span><h2 data-focus>${success ? this.kind === 'daily' ? 'Daily dash, done!' : 'Look at you go!' : 'A little bump. A new beginning.'}</h2><p>${success ? this.kind === 'daily' ? 'Four topics explored. Your best daily score is saved.' : `${esc(worlds[this.world].name)} explored. Your next adventure is waiting.` : 'Your learning answers are saved. Try again, or take a no-pressure chill ride.'}</p><div class="dash-result-grid"><div><strong>${this.score}</strong><small>Game points</small></div><div><strong>${this.stars}</strong><small>Stars collected</small></div><div><strong>${this.correct}/${this.answers.length}</strong><small>Answers correct</small></div></div><p class="dash-fine">${success ? 'Exploration stars celebrate this run, not exam readiness.' : `${this.checkpoint} / ${this.deck.length} checkpoints completed.`}</p>${success && this.kind !== 'daily' && this.world < 3 ? '<button class="dash-button dash-primary" data-dash-action="world">Next world →</button>' : '<button class="dash-button dash-primary" data-dash-action="retry">Play again →</button>'}<div class="dash-result-actions"><button class="dash-button dash-secondary" data-dash-action="leave">Back to arcade</button>${review ? `<button class="dash-button dash-secondary" data-domain="${esc(review)}">Review a missed idea</button>` : '<button class="dash-button dash-secondary" data-view="readiness">My learning progress</button>'}</div>`);
+      this.show(`<span class="dash-result-stars" aria-label="${medal} of 3 exploration stars">${success ? '★'.repeat(medal) + '☆'.repeat(3 - medal) : '♡'}</span><span class="dash-kicker">${freshBest ? 'NEW ADVENTURE BEST!' : success ? 'JOURNEY COMPLETE' : 'EVERY RUN IS A FRESH START'}</span><h2 data-focus>${success ? this.kind === 'daily' ? 'Daily dash, done!' : 'Look at you go!' : 'A little bump. A new beginning.'}</h2><p>${success ? this.kind === 'daily' ? 'Four topics explored. Your best daily score is saved.' : `${esc(worlds[this.world].name)} explored. Your next adventure is waiting.` : 'Your learning answers are saved. Try again, or take a no-pressure chill ride.'}</p><div class="dash-result-grid"><div><strong>${this.score}</strong><small>Game points</small></div><div><strong>${this.stars}</strong><small>Stars collected</small></div><div><strong>${this.correct}/${this.answers.length}</strong><small>Answers correct</small></div></div><p class="dash-game-recap">💎 ${this.boosts} boost${this.boosts === 1 ? '' : 's'} · ⚡ Best combo ${this.maxStreak} stars</p>${badgeAward}<p class="dash-fine">${success ? 'Exploration stars celebrate this run, not exam readiness.' : `${this.checkpoint} / ${this.deck.length} checkpoints completed.`}</p>${success && this.kind !== 'daily' && this.world < 3 ? '<button class="dash-button dash-primary" data-dash-action="world">Next world →</button>' : '<button class="dash-button dash-primary" data-dash-action="retry">Play again →</button>'}<div class="dash-result-actions"><button class="dash-button dash-secondary" data-dash-action="leave">Back to arcade</button>${review ? `<button class="dash-button dash-secondary" data-domain="${esc(review)}">Review a missed idea</button>` : '<button class="dash-button dash-secondary" data-view="readiness">My learning progress</button>'}</div>`);
     }
     draw() {
       const c = this.ctx; if (!c) return;
