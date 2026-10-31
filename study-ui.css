@@ -24,3 +24,11 @@ html,body{overflow-x:clip}html{scroll-padding-top:0}.study-resume>.btn{flex:0 0 
 .syllabus-item .btn{flex-shrink:0}
 @media(max-width:520px){.syllabus-item{align-items:flex-start;flex-direction:column}.syllabus-item .btn{width:100%}}
 @media(prefers-reduced-motion:reduce){#study-syllabus *,#study-syllabus *::before,#study-syllabus *::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Study resource library */
+#study-resources{margin:20px 0}
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:12px 0 22px}
+.resource-item{border:1px solid #ded7e7;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.resource-item h4,.resource-item p{margin:0}
+.resource-item .btn{margin-top:auto;align-self:flex-start}
+.resource-item a:focus-visible{outline:3px solid #6846ae;outline-offset:3px}
