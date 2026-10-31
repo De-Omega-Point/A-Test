@@ -142,10 +142,13 @@ with site() as url, sync_playwright() as p:
         page.locator('[data-dash-start]').first.click()
         page.locator('[data-dash-action="begin"]').click()
         page.wait_for_timeout(250)
-        travel_a = page.evaluate('active && active.roadTravel')
+        # The game keeps its active session private. Test rendered frames,
+        # rather than reaching inside its closure for undocumented state.
+        check('Adventure canvas is visible', page.locator('#dash-canvas').is_visible())
+        frame_a = page.locator('#dash-canvas').evaluate('(canvas) => canvas.toDataURL()')
         page.wait_for_timeout(850)
-        travel_b = page.evaluate('active && active.roadTravel')
-        check('Adventure visibly advances flight distance', travel_b > travel_a + 50)
+        frame_b = page.locator('#dash-canvas').evaluate('(canvas) => canvas.toDataURL()')
+        check('Adventure canvas animates across frames', frame_a != frame_b)
         check('Adventure game loop is running', page.locator('.dash-game').count() == 1 and page.locator('#dash-overlay[hidden]').count() == 1)
         page.locator('[data-dash-action="pause"]').click()
         check('Adventure pauses once without glitch loop', 'Cloud break' in page.locator('#dash-overlay').inner_text())
