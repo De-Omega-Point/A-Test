@@ -12,7 +12,7 @@ function fixture(initial={},blocked=false){
  Object.defineProperty(window,'localStorage',{get(){if(blocked)throw new Error('Storage denied');return native;}});
  const document={querySelector:s=>s==='#app'?app:node(),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:()=>node(),addEventListener(){},body:node()};
  const context=vm.createContext({console,window,document,localStorage:native,Event:class{},setInterval:()=>1,clearInterval(){}});
- for(const file of ['storage.js','v3-content.js','v3-intelligence.js','lesson-resources.js','app.js','study-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
+ for(const file of ['storage.js','v3-content.js','v3-intelligence.js','lesson-resources.js','booklet-reader.js','app.js','study-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
  return{context,app,stored,run:s=>vm.runInContext(s,context)};
 }
 let f=fixture();
@@ -23,6 +23,12 @@ f.run('flipped=true;cards()');check(f.app.innerHTML!==first,'Reveal changes the 
 f.run('study()');check(f.app.innerHTML.includes('data-view="readings"')&&f.app.innerHTML.includes('data-view="glossary"'),'Study exposes readings and glossary');
 check(f.app.innerHTML.includes('id="part-values"')&&f.app.innerHTML.includes('id="study-library"'),'Study sections have real scroll targets');
 check(f.app.innerHTML.includes('id="study-syllabus"'),'Study syllabus is accessible from Study');
+check(f.app.innerHTML.includes('data-booklet-open'),'Official booklet reader is accessible from Study');
+check(f.run('atestBookletPage(999)')===43,'Booklet page selector clamps to final glossary page');
+check(f.run('atestBookletUrl(7)').includes('#page=9'),'Printed booklet page maps to correct PDF page');
+check(f.run('atestSaveBooklet({page:21,notes:"Key point"})')===true,'Booklet state saves independently');
+check(f.run('atestReadBooklet().page')===21,'Booklet saved page can be restored');
+check(f.run('state.mocks.length')===0,'Booklet reading does not affect mock history');
 check(f.app.innerHTML.includes('id="study-resources"'),'Study has external resource library');
 check((f.app.innerHTML.match(/resource-item/g)||[]).length===6,'Six verified resource cards appear');
 check(f.app.innerHTML.includes('noopener noreferrer'),'External resources open with safe link attributes');
