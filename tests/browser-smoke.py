@@ -83,7 +83,7 @@ with site() as url, sync_playwright() as p:
         check('Official booklet shortcut displayed', page.locator('[data-booklet-open]').count() >= 1)
         page.locator('#official-booklet-shortcut [data-booklet-open]').click()
         check('Official PDF reader renders', page.locator('.booklet-reader iframe').count() == 1)
-        check('Booklet is served from local GitHub Pages asset', page.locator('.booklet-reader iframe').get_attribute('src').startswith('assets/our-common-bond-testable.pdf#page='))
+        check('Booklet is served from local GitHub Pages asset', page.locator('.booklet-reader iframe').get_attribute('src').startswith('/A-Test/assets/our-common-bond-testable.pdf#page='))
         check('Booklet page 7 maps to PDF page 9', '#page=9' in page.locator('.booklet-reader iframe').get_attribute('src'))
         page.locator('#booklet-page').fill('25')
         page.locator('[data-booklet-go]').click()
