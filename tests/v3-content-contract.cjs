@@ -11,7 +11,7 @@ for(const id of required){
   const html=call(id);
   assert.match(html,/Learning objective/);
   assert.match(html,/Explain it back/);
-  assert.match(html,/Our Common Bond pp/);
+  assert.match(html,/OUR COMMON BOND pp/);
   assert.match(html,/details/);
   assert.match(html,/Reinforcement:/);
 }
