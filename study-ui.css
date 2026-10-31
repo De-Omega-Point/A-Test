@@ -53,3 +53,6 @@ html,body{overflow-x:clip}html{scroll-padding-top:0}.study-resume>.btn{flex:0 0 
 .booklet-reader textarea{width:100%;min-height:100px;padding:12px;border:1px solid #b9b1c7;border-radius:10px}
 .booklet-reader button:focus-visible,.booklet-reader a:focus-visible{outline:3px solid #6547ac;outline-offset:3px}
 @media(max-width:560px){.booklet-reader{padding:12px}.booklet-reader iframe{min-height:420px;height:60vh}.booklet-section{flex-wrap:wrap}.booklet-controls>*{flex:1 1 150px}}
+
+/* WCAG AA: version/build label must remain readable at small sizes. */
+.build-label { color:#34415c; opacity:1; font-size:12px; font-weight:600; }
