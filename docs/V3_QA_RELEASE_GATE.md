@@ -30,3 +30,10 @@ Do NOT merge PR #1 or release the app until the above is verified and the founde
 - GitHub commit status and pull-request workflow-run lookup for the latest V3 commit returned **no reported runs/statuses**. This is **NOT a pass**. CI setup/visibility must be resolved before a production merge.
 - Source-by-source accuracy and full accessibility verification are still outstanding.
 - Do not equate tests committed to GitHub with tests executed successfully.
+
+## Verified CI milestone — 31 October 2026
+- GitHub Actions validation run **41158442604** for commit `02e1b92ea7fc35a896670352de63c58b2578ce3c`: **success** (validate job completed successfully).
+- Verified steps include syntax, required files, product contract, arcade, study regression checks, V3 content/examination contracts and Chromium browser smoke tests.
+- Pages deployment job **skipped as designed** for development-branch validation. No changes merged into production.
+- Fixed browser smoke-test regression that improperly accessed the private arcade closure variable `active`; current test measures change in the learner-visible canvas rendering instead.
+- Outstanding manual release gates: full fact-by-fact source audit against *Our Common Bond*, accessibility/manual-device review, and founder approval. Green CI is necessary but not sufficient for final publication.
