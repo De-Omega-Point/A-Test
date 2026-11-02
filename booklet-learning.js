@@ -86,6 +86,8 @@ function atestMicroNext(part){
 function atestMicroCockpitHtml(){
  const n=atestMicroCounts(),next=atestMicroNext(),p=n.total?Math.round(n.mastered/n.total*100):0;
  const values=atestMicroRead().values||{};
+ const reading=typeof atestReadBooklet==='function'?atestReadBooklet():{};
+ const resume=Number(reading.pdfPage)||9;
  return '<section class="booklet-learning-cockpit" id="booklet-learning-cockpit" aria-label="Booklet learning and reinforcement">'+
   '<div class="micro-cockpit-top"><span class="micro-kicker">READ · RECALL · CHECK · REVISIT</span>'+
   '<h2>Make each page stick</h2><p>One small idea at a time, with quick checks and spaced reminders. These are independent study aids, not official citizenship test questions.</p></div>'+
@@ -97,6 +99,7 @@ function atestMicroCockpitHtml(){
   '<div class="micro-progress-track" role="progressbar" aria-label="Microlearning recall strengthened" aria-valuenow="'+n.mastered+'" aria-valuemin="0" aria-valuemax="'+n.total+'"><i style="width:'+p+'%"></i></div>'+
   '<div class="micro-cockpit-actions">'+
   (next?'<button type="button" class="micro-action-primary" data-micro-jump="'+atestMicroEscape(next.id)+'">'+(n.due?'↻ Review due concept':'▶ '+(n.started?'Continue micro-learning':'Start first mini-lesson'))+'</button>':'')+
+  '<button type="button" data-micro-resume="'+resume+'">📖 Resume reading at page '+(resume>=9&&resume<=45?(resume-2):'PDF '+resume)+'</button>'+ 
   '<button type="button" data-micro-values-jump>🛡️ Australian Values 5/5 practice</button></div>'+
   '<div class="micro-chapter-nav" aria-label="Four learning parts">'+ATEST_MICRO_CHAPTERS.map(ch=>{
    const c=atestMicroCounts(ch.id);
@@ -233,13 +236,17 @@ function atestValuesNext(){
  atestValuesRender(true);atestMicroRefresh();
 }
 document.addEventListener('click',event=>{
- const button=event.target.closest('[data-micro-choice],[data-micro-again],[data-micro-jump],[data-micro-chapter-jump],[data-micro-values-jump],[data-values-start],[data-values-choice],[data-values-next]');
+ const button=event.target.closest('[data-micro-choice],[data-micro-again],[data-micro-jump],[data-micro-chapter-jump],[data-micro-values-jump],[data-micro-resume],[data-values-start],[data-values-choice],[data-values-next]');
  if(!button||button.disabled)return;
  event.preventDefault();
  if(button.hasAttribute('data-micro-jump')){atestMicroJump(button.dataset.microJump);return;}
  if(button.hasAttribute('data-micro-chapter-jump')){
   const target=document.getElementById('booklet-chapter-'+button.dataset.microChapterJump);
   if(target)target.scrollIntoView({block:'start',behavior:'auto'});
+  return;
+ }
+ if(button.hasAttribute('data-micro-resume')){
+  if(typeof atestBookletGoPdf==='function')atestBookletGoPdf(Number(button.dataset.microResume));
   return;
  }
  if(button.hasAttribute('data-micro-values-jump')){
