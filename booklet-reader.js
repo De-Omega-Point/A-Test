@@ -15,6 +15,7 @@ const ATEST_BOOKLET_SECTIONS=[
  ['Glossary',40,43]
 ];
 let atestBookletScrollPending=false;
+let atestBookletExplicitJumpUntil=0;
 let atestTranscriptPromise=null;
 
 function atestReadBooklet(){
@@ -63,10 +64,15 @@ function atestBookletGoPdf(pdf,announce=true){
  const n=atestBookletPdfPage(pdf);
  const target=document.getElementById('booklet-pdf-page-'+n);
  if(!target)return;
- atestUpdateReaderPosition(n,!announce);
+ // WebKit/Safari may emit delayed scroll events as lazy images settle.
+ // Give a deliberate page jump precedence over passive reading-position tracking.
+ atestBookletExplicitJumpUntil=Date.now()+2800;
  target.scrollIntoView({block:'start',behavior:'auto'});
+ atestUpdateReaderPosition(n,!announce);
+ requestAnimationFrame(()=>atestUpdateReaderPosition(n,true));
 }
 function atestBookletTrackScroll(){
+ if(Date.now()<atestBookletExplicitJumpUntil)return;
  if(atestBookletScrollPending||!document.querySelector('.booklet-pages'))return;
  atestBookletScrollPending=true;
  requestAnimationFrame(()=>{
@@ -82,6 +88,13 @@ function atestBookletTrackScroll(){
   if(closest)atestUpdateReaderPosition(Number(closest.dataset.pdfPage),true);
  });
 }
+// As soon as the user intentionally scrolls, normal tracking resumes.
+function atestBookletManualScroll(){atestBookletExplicitJumpUntil=0}
+window.addEventListener('wheel',atestBookletManualScroll,{passive:true});
+window.addEventListener('touchmove',atestBookletManualScroll,{passive:true});
+window.addEventListener('keydown',event=>{
+ if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key))atestBookletManualScroll();
+},{passive:true});
 window.addEventListener('scroll',atestBookletTrackScroll,{passive:true});
 window.addEventListener('resize',atestBookletTrackScroll,{passive:true});
 
