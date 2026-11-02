@@ -45,7 +45,7 @@ def validate(engine,url,width,height):
 
     # Answer a real page-8 mini-lesson and ensure no mock result changes.
     mock_before=page.evaluate('localStorage.getItem("atest-state")')
-    page.locator('[data-micro-jump="first-peoples"]').click()
+    page.locator('#booklet-learning-cockpit [data-micro-jump="first-peoples"]').click()
     card=page.locator('#booklet-micro-first-peoples')
     assert card.get_attribute('open') is not None
     card.locator('details.micro-recall summary').click()
