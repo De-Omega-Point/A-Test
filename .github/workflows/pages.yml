@@ -33,13 +33,16 @@ jobs:
           node --check v3-intelligence.js
           node --check lesson-resources.js
           node --check booklet-reader.js
+          node --check booklet-micro-content.js
+          node --check booklet-learning.js
+          node --check tests/booklet-micro-contract.cjs
           test -s scripts/build-booklet-pages.py
           test -s tests/booklet-cross-browser.py
           node --check tests/v3-exam-contract.cjs
           node --check tests/v3-content-contract.cjs
           node --check tests/official-content-contract.cjs
       - name: Required files
-        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs && test -s lesson-resources.js && test -s booklet-reader.js && test -s assets/our-common-bond-testable.pdf
+        run: test -s index.html && test -s styles.css && test -s app.js && test -s arcade.css && test -s arcade.js && test -s storage.js && test -s study-ui.js && test -s study-ui.css && test -s v3-content.js && test -s v3-intelligence.js && test -s tests/v3-exam-contract.cjs && test -s tests/v3-content-contract.cjs && test -s lesson-resources.js && test -s booklet-reader.js && test -s booklet-micro-content.js && test -s booklet-learning.js && test -s booklet-learning.css && test -s tests/booklet-micro-browser.py && test -s assets/our-common-bond-testable.pdf
       - name: Local booklet PDF integrity
         run: |
           python - <<'PY'
@@ -71,7 +74,9 @@ jobs:
       - name: Arcade regression checks
         run: node tests/arcade-contract.cjs
       - name: Study regression checks
-        run: node tests/study-contract.cjs
+        run: |
+          node tests/study-contract.cjs
+          node tests/booklet-micro-contract.cjs
       - name: V3 deep-learning regression checks
         run: |
           node tests/v3-content-contract.cjs
@@ -85,6 +90,8 @@ jobs:
         run: |
           python -m pip install playwright==1.57.0 pymupdf==1.26.7
           python -m playwright install --with-deps chromium firefox webkit
+      - name: Validate micro-lesson source-page anchors
+        run: python tests/booklet-source-anchors.py
       - name: Generate native booklet pages and selectable transcripts
         run: python scripts/build-booklet-pages.py
       - name: Verify rendered booklet completeness
@@ -104,6 +111,8 @@ jobs:
         run: python tests/browser-smoke.py
       - name: Test native booklet scrolling in Chromium Firefox and WebKit
         run: python tests/booklet-cross-browser.py
+      - name: Test booklet chapter microlearning in Chromium Firefox and WebKit
+        run: python tests/booklet-micro-browser.py
       - name: Verify Civic Dash across Chromium Firefox and WebKit
         run: python tests/dash-cross-browser.py
       - name: Install automated accessibility audit
@@ -190,6 +199,9 @@ jobs:
                   assert marker.get('syllabusTopics')==42, marker
                   html=fetch('index.html').decode('utf-8')
                   assert 'booklet-reader.js' in html and 'study-ui.js' in html
+                  assert 'booklet-micro-content.js' in html and 'booklet-learning.js' in html and 'booklet-learning.css' in html
+                  companion=fetch('booklet-learning.js').decode('utf-8')
+                  assert 'atestMicroGrade' in companion and 'atestValuesNext' in companion, 'Live reinforcement learning unavailable'
                   attested=json.loads(fetch('release-build.json'))
                   assert attested['commit']==os.environ['GITHUB_SHA'], ('Published commit is stale',attested['commit'],os.environ['GITHUB_SHA'])
                   reader=fetch('booklet-reader.js').decode('utf-8')

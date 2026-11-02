@@ -1,0 +1,89 @@
+/* AUS-TEST Booklet Companion: four chapter missions, source-page mini-lessons,
+   spaced recall and an independent 5/5 Australian Values practice challenge. */
+.booklet-reader .micro-kicker{display:block;margin:0 0 7px;color:#514071;font-size:12px;font-weight:800;letter-spacing:.055em}
+.booklet-learning-cockpit{margin:22px 0 26px;padding:22px;background:linear-gradient(130deg,#f1eaff,#fcf8ec 58%,#ebf6f3);border:1px solid #d9cbe7;border-radius:22px}
+.micro-cockpit-top h2{font-size:clamp(22px,3vw,29px);margin:3px 0 8px;letter-spacing:-.025em;color:#293650}
+.micro-cockpit-top p{color:#4b5164;line-height:1.6;margin:0 0 16px;max-width:77ch}
+.micro-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.micro-stat-grid>div{border:1px solid #e0d7e7;background:#fffdfd;border-radius:13px;padding:12px 10px;min-width:0}
+.micro-stat-grid strong{display:block;color:#263955;font-size:23px;font-variant-numeric:tabular-nums;line-height:1.2}
+.micro-stat-grid span{display:block;color:#4f5262;font-size:12px;line-height:1.35;margin-top:6px}
+.micro-progress-track{width:100%;height:9px;border-radius:20px;overflow:hidden;background:#e3dce9;margin:16px 0}
+.micro-progress-track i{display:block;background:#407a68;height:100%;border-radius:20px;transition:width .25s ease}
+.micro-cockpit-actions{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 15px}
+.micro-cockpit-actions button,.booklet-chapter-panel>button,.micro-feedback button,.booklet-values-practice button,.micro-source button{font:inherit;cursor:pointer;border:1px solid #ab9cbe;border-radius:11px;background:#fff;padding:10px 13px;min-height:44px;color:#3d3262;font-weight:750}
+.micro-cockpit-actions .micro-action-primary,.booklet-values-practice .micro-action-primary{background:#403072;border-color:#403072;color:#fff}
+.micro-cockpit-actions button:hover,.booklet-chapter-panel>button:hover,.booklet-values-practice button:hover{box-shadow:0 3px 10px #4a3b651c}
+.micro-chapter-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.micro-chapter-nav button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-height:74px;cursor:pointer;background:#fff;border:1px solid #e1d8e6;border-radius:13px;padding:11px;text-align:left;color:#3b3553}
+.micro-chapter-nav button>span:first-child{font-size:18px}
+.micro-chapter-nav button>span:nth-child(2){font-weight:800;font-size:13px}
+.micro-chapter-nav button small{color:#525366;font-size:11px}
+.micro-cockpit-note{font-size:12px;color:#484658;line-height:1.55;margin:14px 0 0}
+.booklet-chapter-panel{scroll-margin-top:155px;display:flex;align-items:center;gap:16px;margin:24px 0 15px;padding:18px;background:#f5f0fd;border:1px solid #ded1ed;border-left:5px solid #7560aa;border-radius:16px}
+.booklet-chapter-panel .booklet-chapter-icon{font-size:32px;line-height:1.2;flex:none}
+.booklet-chapter-copy{flex:1;min-width:0}
+.booklet-chapter-panel h2{font-size:23px;margin:0 0 6px;color:#312d53}
+.booklet-chapter-panel p{color:#4f4a60;line-height:1.55;margin:5px 0}
+.booklet-chapter-panel [data-micro-chapter-progress]{font-size:13px;font-weight:750;color:#395d64}
+.booklet-chapter-panel>button{flex:0 0 auto;max-width:185px}
+.booklet-mini-stops{margin:12px 0 32px;padding:15px;background:#fcfbff;border:1px solid #e2deec;border-radius:17px}
+.micro-group-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px}
+.micro-group-heading .micro-kicker{margin:0}
+.micro-group-heading h2{font-size:18px;color:#32334d;margin:0}
+.booklet-micro-card{scroll-margin-top:165px;background:#fff;border:1px solid #dcd9e7;border-radius:13px;margin:8px 0;overflow:hidden}
+.booklet-micro-card[open]{border-color:#b1a2d4;box-shadow:0 7px 20px #3226530d}
+.booklet-micro-card>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:15px 14px;min-height:72px;color:#302d50}
+.booklet-micro-card>summary::-webkit-details-marker{display:none}
+.booklet-micro-card>summary:focus-visible,.micro-recall>summary:focus-visible,.micro-options button:focus-visible{outline:3px solid #57429a;outline-offset:-3px}
+.booklet-micro-card>summary:after{content:'▾';color:#55437a;font-size:17px;margin-left:3px}
+.booklet-micro-card[open]>summary:after{content:'▴'}
+.micro-card-icon{font-size:25px;flex:none;min-width:33px;text-align:center}
+.micro-card-title{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.micro-card-title small{font-size:11px;color:#59486f;font-weight:800;letter-spacing:.035em}
+.micro-card-title strong{font-size:16px;color:#2c3151}
+.micro-state{font-size:11px;color:#365f60;background:#e8f4ef;padding:6px 8px;border-radius:9px;font-weight:750;max-width:125px;text-align:center}
+.micro-card-body{border-top:1px solid #e5ddec;padding:18px}
+.micro-card-body p{line-height:1.6}
+.micro-key-idea{font-size:15px;color:#263651;margin:0 0 10px}
+.micro-memory-hook{background:#fff6db;border-left:4px solid #be8f2f;color:#523f20;padding:11px 13px;border-radius:8px;font-weight:600}
+.micro-recall{margin:17px 0;padding:13px 14px;border:1px solid #c5dce9;background:#f0f8fb;border-radius:12px}
+.micro-recall summary{color:#264f70;cursor:pointer;font-weight:750;line-height:1.5}
+.micro-recall p{margin:12px 0 2px;color:#24445f}
+.micro-quiz-label{color:#4f3d81;font-size:11px;font-weight:800;letter-spacing:.08em;margin:18px 0 6px}
+.micro-quiz h3,.booklet-values-practice h3{color:#2a304b;font-size:18px;line-height:1.4;margin:5px 0 12px;font-weight:800}
+.micro-options{display:grid;gap:8px}
+.micro-options button{display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;min-height:49px;padding:11px 13px;border:1px solid #cbc4d9;border-radius:10px;background:#fff;color:#27334d;font-size:14px;line-height:1.5;font-weight:600;cursor:pointer}
+.micro-options button:hover:not(:disabled){border-color:#8a70c2;background:#f7f1ff}
+.micro-options button>span{display:grid;place-items:center;width:24px;height:24px;flex:none;border:1px solid #d1c7de;background:#f6f1fd;border-radius:7px;color:#3b2d69;font-size:12px;font-weight:900}
+.micro-options button:disabled{cursor:default;opacity:.80}
+.micro-options button.micro-chosen{border-color:#6a539e;background:#f4f1fd;opacity:1}
+.micro-feedback{margin:13px 0 2px;padding:14px;border-radius:11px;line-height:1.55}
+.micro-feedback strong{display:block;color:#26445e;margin-bottom:6px;font-size:15px}
+.micro-feedback p{margin:7px 0;color:#334459}
+.micro-feedback-good{border:1px solid #9bcbbb;background:#edf8f2}
+.micro-feedback-review{border:1px solid #e0c59d;background:#fff8e9}
+.micro-feedback button{margin-top:8px}
+.micro-source{margin:14px 0 0;font-size:12px;color:#4b5067;line-height:1.6}
+.micro-source button{min-height:35px;padding:5px 8px;font-size:12px;border-radius:8px}
+.booklet-values-practice{scroll-margin-top:155px;margin:32px 0;padding:23px;border-radius:21px;background:linear-gradient(145deg,#edf5f1,#fcf9ef 68%,#f0edfa);border:2px solid #b3ccbf}
+.booklet-values-practice h2{color:#294443;font-size:25px;line-height:1.25;margin:3px 0 11px}
+.booklet-values-practice>p{color:#3a4b52;line-height:1.6;max-width:78ch}
+.values-challenge-status,.values-challenge-result{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0;padding:13px;background:#fff;border-radius:12px;border:1px solid #c8d4cb;color:#264b44}
+.values-challenge-result{display:block}
+.values-challenge-status span{color:#45625c;font-size:12px}
+.values-challenge-result strong{display:block;font-size:22px}
+.values-progress{font-weight:800;color:#315f53}
+.values-five-track{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0 20px}
+.values-five-track span{height:8px;background:#d5d9d7;border-radius:8px}
+.values-five-track span.done{background:#458a6f}
+.values-five-track span.now{background:#a87942}
+.booklet-values-practice .micro-feedback{margin-top:14px}
+.booklet-values-practice .micro-feedback button{border-color:#739e91;background:#eaf6ef;color:#264c43}
+@media(max-width:800px){.micro-chapter-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.booklet-chapter-panel{flex-wrap:wrap}.booklet-chapter-panel>button{max-width:none}}
+@media(max-width:530px){.booklet-learning-cockpit{padding:14px}.micro-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.micro-cockpit-actions{display:grid;grid-template-columns:1fr}.booklet-chapter-panel{padding:14px;gap:8px}.booklet-chapter-panel h2{font-size:20px}.booklet-mini-stops{padding:10px}.booklet-micro-card>summary{gap:8px;padding:12px 9px}.micro-state{max-width:93px;font-size:10px}.micro-card-body{padding:13px}.micro-card-title strong{font-size:14px}.micro-card-icon{font-size:21px;min-width:24px}.booklet-values-practice{padding:14px}.micro-options button{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.micro-progress-track i{transition:none}}
+
+/* Chapter panels share the same flexible width as the original PDF pages. */
+.booklet-pages>.booklet-chapter-panel,.booklet-pages>.booklet-mini-stops,.booklet-pages>.booklet-values-practice{width:min(100%,1012px);max-width:100%;min-width:0;box-sizing:border-box}
+.booklet-micro-card,.micro-options,.micro-card-body{min-width:0;max-width:100%}
