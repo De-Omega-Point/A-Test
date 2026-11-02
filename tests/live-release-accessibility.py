@@ -147,7 +147,7 @@ with serve_checkout() as local_url, sync_playwright() as pw:
     check("Reader has 27 source-linked micro lessons",page.locator(".booklet-micro-card").count()==27)
     check("Reader includes a five-value practice challenge",page.locator("#booklet-values-practice").count()==1)
     check("Spaced review has a progress indicator",page.locator('.micro-progress-track[role="progressbar"]').count()==1)
-    page.locator('[data-micro-jump="first-peoples"]').click()
+    page.locator('#booklet-learning-cockpit [data-micro-jump="first-peoples"]').click()
     check("Recall exercise is keyboard-accessible",page.locator("#booklet-micro-first-peoples[open] summary").count()>=1)
     micro_issues=audit("Booklet open microlearning")
     correct=page.evaluate("ATEST_MICRO_CARDS[0].correct")
