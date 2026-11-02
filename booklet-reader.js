@@ -77,7 +77,7 @@ function atestBookletTrackScroll(){
   for(const page of document.querySelectorAll('.booklet-page')){
    const bounds=page.getBoundingClientRect();
    if(bounds.top<=marker&&bounds.bottom>marker){closest=page;break}
-   if(bounds.top>marker){closest=page;break}
+   if(bounds.top>marker)break;
   }
   if(closest)atestUpdateReaderPosition(Number(closest.dataset.pdfPage),true);
  });
@@ -88,6 +88,7 @@ window.addEventListener('resize',atestBookletTrackScroll,{passive:true});
 function atestBookletPagesHtml(targetPdf){
  let html='';
  for(let pdf=1;pdf<=ATEST_PDF_PAGE_COUNT;pdf++){
+  if(typeof atestMicroChapterHeader==='function')html+=atestMicroChapterHeader(pdf);
   const label=atestBookletPageDescription(pdf);
   const image=atestBookletImage(pdf),alt='Original Our Common Bond page image: '+label;
   html+='<figure class="booklet-page" id="booklet-pdf-page-'+pdf+'" data-pdf-page="'+pdf+'" tabindex="-1">'+
@@ -96,6 +97,7 @@ function atestBookletPagesHtml(targetPdf){
    '<img src="'+image+'" width="1012" height="1432" alt="'+atestBookletEscape(alt)+'" loading="'+(Math.abs(pdf-targetPdf)<=1?'eager':'lazy')+'" decoding="async"></a>'+
    '<details data-booklet-transcript="'+pdf+'"><summary>Read selectable text from this page</summary>'+
    '<div class="booklet-transcript" aria-live="polite">Opening the text transcript…</div></details></figure>';
+  if(typeof atestMicroAfterPdf==='function')html+=atestMicroAfterPdf(pdf);
  }
  return html;
 }
@@ -126,6 +128,7 @@ function atestReaderView(page){
   '<strong id="booklet-page-indicator">'+escape(atestBookletPageDescription(currentPdf))+'</strong>'+
   '<button type="button" data-booklet-step="1">Next page →</button></div>'+
   '<p id="booklet-status" role="status" aria-live="polite">'+done+'/5 sections reviewed. Scroll down to read continuously.</p>'+
+  (typeof atestMicroCockpitHtml==='function'?atestMicroCockpitHtml():'')+
   '<div class="booklet-pages" aria-label="Original booklet pages, scroll vertically">'+atestBookletPagesHtml(currentPdf)+'</div>'+
   '<p class="booklet-fallback"><a href="'+escape(atestBookletUrl(printed))+'" target="_blank" rel="noopener noreferrer">Open the full original PDF in a new tab</a> · '+
   '<a href="'+ATEST_BOOKLET_URL+'" target="_blank" rel="noopener noreferrer">Download the original PDF</a></p>'+
@@ -141,7 +144,10 @@ function atestReaderView(page){
  state.pdfPage=currentPdf;
  if(currentPdf>=9&&currentPdf<=45)state.page=currentPdf-2;
  atestSaveBooklet(state);
- requestAnimationFrame(()=>atestBookletGoPdf(currentPdf,false));
+ requestAnimationFrame(()=>{
+  if(given)atestBookletGoPdf(currentPdf,false);
+  else window.scrollTo({top:0,behavior:'auto'});
+ });
 }
 document.addEventListener('click',event=>{
  const trigger=event.target.closest('[data-booklet-open],[data-booklet-page],[data-booklet-go],[data-booklet-save],[data-booklet-notes],[data-booklet-return],[data-booklet-step]');
@@ -152,7 +158,7 @@ document.addEventListener('click',event=>{
   const id=localStorage.getItem('atest-last-domain');
   return id&&typeof domainKnowledge!=='undefined'&&domainKnowledge[id]?route('domain/'+id):route('study');
  }
- if(trigger.hasAttribute('data-booklet-open'))return atestReaderView(trigger.dataset.bookletOpen||saved.page||7);
+ if(trigger.hasAttribute('data-booklet-open'))return atestReaderView(trigger.dataset.bookletOpen||null);
  if(trigger.hasAttribute('data-booklet-page'))return atestBookletGoPdf(atestBookletPage(trigger.dataset.bookletPage)+2);
  if(trigger.hasAttribute('data-booklet-go'))return atestBookletGoPdf(atestBookletPage(document.getElementById('booklet-page')?.value)+2);
  if(trigger.hasAttribute('data-booklet-step'))return atestBookletGoPdf(atestCurrentPdfPage()+Number(trigger.dataset.bookletStep));
