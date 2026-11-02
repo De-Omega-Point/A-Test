@@ -68,7 +68,10 @@ for(let i=0;i<5;i++)run('atestValuesChoice(ATEST_VALUES_PRACTICE[atestValuesRun.
 check(run('atestMicroRead().values.best')===5&&run('atestMicroRead().values.lastScore')===5,'Perfect 5/5 values practice is recorded');
 check(run('atestMicroRead().values.passedAt')>0,'Perfect values practice records timestamp');
 run('atestValuesStart()');
-for(let i=0;i<5;i++)run('atestValuesChoice(i===0 ? (ATEST_VALUES_PRACTICE[atestValuesRun.order[atestValuesRun.index]].correct+1)%3 : ATEST_VALUES_PRACTICE[atestValuesRun.order[atestValuesRun.index]].correct);atestValuesNext()');
+for(let i=0;i<5;i++){
+ const answer=run('ATEST_VALUES_PRACTICE[atestValuesRun.order[atestValuesRun.index]].correct');
+ run('atestValuesChoice('+(i===0?(answer+1)%3:answer)+');atestValuesNext()');
+}
 check(run('atestMicroRead().values.best')===5&&run('atestMicroRead().values.lastScore')===4,'A 4/5 values run is not a new perfect practice run');
 check(run('atestValuesHtml()').includes('4/5: Revisit and retry'),'Values practice uses a strict five-correct gate');
 check(storage.get('atest-state')===JSON.stringify({mocks:[{score:16,valuesCorrect:5}],domains:{federation:3}}),'Booklet learning never modifies exam or domain progress');
