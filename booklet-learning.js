@@ -149,7 +149,7 @@ function atestMicroAfterPdf(pdf){
  let html=cards.length?'<section class="booklet-mini-stops" aria-label="Page '+printed+' reinforcement">'+
   '<div class="micro-group-heading"><span class="micro-kicker">AFTER PAGE '+printed+'</span><h2>Check what you remember</h2></div>'+
   cards.map(card=>atestMicroCardHtml(card)).join('')+'</section>':'';
- if(printed===39)html+=atestMicroValuesContainerHtml();
+ if(printed===39)html+=atestValuesContainerHtml();
  return html;
 }
 function atestMicroRefresh(){
