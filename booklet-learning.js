@@ -192,7 +192,7 @@ function atestValuesHtml(){
  }
  const scenario=ATEST_VALUES_PRACTICE[r.order[r.index]],graded=!!r.answered;
  return header+'<p class="values-progress">Scenario '+(r.index+1)+' of 5 · '+r.correct+' correct so far</p>'+
-  '<div class="values-five-track" role="group" aria-label="Five-question progress">'+Array.from({length:5},(_,i)=>'<span class="'+(i<r.index?'done':i===r.index?'now':'')+'" aria-label="Question '+(i+1)+(i<r.index?' finished':'')+'"></span>').join('')+'</div>'+
+  '<div class="values-five-track" role="group" aria-label="Five-question progress">'+Array.from({length:5},(_,i)=>'<span class="'+(i<r.index?'done':i===r.index?'now':'')+'" aria-hidden="true"></span>').join('')+'</div>'+
   '<h3>'+atestMicroEscape(scenario.question)+'</h3><div class="micro-options">'+scenario.choices.map((choice,i)=>
    '<button type="button" data-values-choice="'+i+'"'+(graded?' disabled':'')+
    (graded&&r.choice===i?' class="micro-chosen"':'')+'><span aria-hidden="true">'+String.fromCharCode(65+i)+'</span>'+atestMicroEscape(choice)+'</button>'
