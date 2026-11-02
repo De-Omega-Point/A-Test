@@ -83,3 +83,7 @@
 @media(max-width:800px){.micro-chapter-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.booklet-chapter-panel{flex-wrap:wrap}.booklet-chapter-panel>button{max-width:none}}
 @media(max-width:530px){.booklet-learning-cockpit{padding:14px}.micro-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.micro-cockpit-actions{display:grid;grid-template-columns:1fr}.booklet-chapter-panel{padding:14px;gap:8px}.booklet-chapter-panel h2{font-size:20px}.booklet-mini-stops{padding:10px}.booklet-micro-card>summary{gap:8px;padding:12px 9px}.micro-state{max-width:93px;font-size:10px}.micro-card-body{padding:13px}.micro-card-title strong{font-size:14px}.micro-card-icon{font-size:21px;min-width:24px}.booklet-values-practice{padding:14px}.micro-options button{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.micro-progress-track i{transition:none}}
+
+/* Chapter panels share the same flexible width as the original PDF pages. */
+.booklet-pages>.booklet-chapter-panel,.booklet-pages>.booklet-mini-stops,.booklet-pages>.booklet-values-practice{width:min(100%,1012px);max-width:100%;min-width:0;box-sizing:border-box}
+.booklet-micro-card,.micro-options,.micro-card-body{min-width:0;max-width:100%}
